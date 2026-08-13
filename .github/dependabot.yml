@@ -8,6 +8,11 @@ updates:
       time: "06:00"
       timezone: Africa/Dakar
     open-pull-requests-limit: 5
+    ignore:
+      # Les versions majeures demandent une migration dédiée et une validation
+      # explicite de la compatibilité Next.js, TypeScript et BPMN.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       application:
         patterns: ["next", "react", "react-dom", "bpmn-js"]
