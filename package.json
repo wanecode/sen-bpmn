@@ -42,15 +42,15 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^22.15.30",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^26.2.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "bpmn-moddle": "^9.0.4",
-    "eslint": "^9.29.0",
+    "bpmn-moddle": "^10.1.0",
+    "eslint": "^10.8.1",
     "eslint-config-next": "^16.3.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.20.3",
-    "typescript": "^5.8.3"
+    "typescript": "^7.0.2"
   }
 }
