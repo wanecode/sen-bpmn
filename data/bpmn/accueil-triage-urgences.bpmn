@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_accueil_triage_urgences" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_accueil_triage_urgences" name="Message métier" />
+  <bpmn:error id="Erreur_accueil_triage_urgences" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_accueil_triage_urgences" name="Accueil et triage aux urgences" isExecutable="false">
+    <bpmn:documentation>Évaluer rapidement la gravité, attribuer une priorité et orienter le patient vers la zone de soins adaptée. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_accueil_triage_urgences">
+      <bpmn:lane id="Couloir_1_accueil_triage_urgences" name="Agent d’accueil">
+        <bpmn:flowNodeRef>debut_accueil_triage_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>enregistrer_accueil_triage_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>identite_accueil_triage_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>provisoire_accueil_triage_urgences</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_accueil_triage_urgences" name="Infirmier organisateur de l’accueil">
+        <bpmn:flowNodeRef>constantes_accueil_triage_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>triage_accueil_triage_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gravite_accueil_triage_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>orienter_accueil_triage_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>attente_accueil_triage_urgences</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_accueil_triage_urgences" name="Médecin urgentiste">
+        <bpmn:flowNodeRef>alerte_accueil_triage_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>transmettre_accueil_triage_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_accueil_triage_urgences</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_accueil_triage_urgences" name="Patient arrivé">
+      <bpmn:outgoing>Flux_1_accueil_triage_urgences</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="enregistrer_accueil_triage_urgences" name="Enregistrer l’arrivée">
+      <bpmn:incoming>Flux_1_accueil_triage_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_accueil_triage_urgences</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="identite_accueil_triage_urgences" name="Identité incertaine" attachedToRef="enregistrer_accueil_triage_urgences" cancelActivity="true">
+      <bpmn:outgoing>Flux_3_accueil_triage_urgences</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_identite_accueil_triage_urgences" errorRef="Erreur_accueil_triage_urgences" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="provisoire_accueil_triage_urgences" name="Créer une identité provisoire">
+      <bpmn:incoming>Flux_3_accueil_triage_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_4_accueil_triage_urgences</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="constantes_accueil_triage_urgences" name="Recueillir motif et constantes">
+      <bpmn:incoming>Flux_2_accueil_triage_urgences</bpmn:incoming>
+      <bpmn:incoming>Flux_4_accueil_triage_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_accueil_triage_urgences</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="triage_accueil_triage_urgences" name="Appliquer le protocole de triage">
+      <bpmn:incoming>Flux_5_accueil_triage_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_accueil_triage_urgences</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_triage_accueil_triage_urgences"><bpmn:outgoing>Flux_interne_1_triage_accueil_triage_urgences</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_triage_accueil_triage_urgences" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_triage_accueil_triage_urgences</bpmn:incoming><bpmn:outgoing>Flux_interne_2_triage_accueil_triage_urgences</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_triage_accueil_triage_urgences"><bpmn:incoming>Flux_interne_2_triage_accueil_triage_urgences</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_triage_accueil_triage_urgences" sourceRef="Debut_interne_triage_accueil_triage_urgences" targetRef="Etapes_internes_triage_accueil_triage_urgences" />
+      <bpmn:sequenceFlow id="Flux_interne_2_triage_accueil_triage_urgences" sourceRef="Etapes_internes_triage_accueil_triage_urgences" targetRef="Fin_interne_triage_accueil_triage_urgences" />
+    </bpmn:subProcess>
+    <bpmn:exclusiveGateway id="gravite_accueil_triage_urgences" name="Priorité rouge ?">
+      <bpmn:incoming>Flux_6_accueil_triage_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_accueil_triage_urgences</bpmn:outgoing>
+      <bpmn:outgoing>Flux_8_accueil_triage_urgences</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="alerte_accueil_triage_urgences" name="Déclencher l’alerte vitale">
+      <bpmn:incoming>Flux_7_accueil_triage_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_accueil_triage_urgences</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_alerte_accueil_triage_urgences"><bpmn:outgoing>Flux_interne_1_alerte_accueil_triage_urgences</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_alerte_accueil_triage_urgences" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_alerte_accueil_triage_urgences</bpmn:incoming><bpmn:outgoing>Flux_interne_2_alerte_accueil_triage_urgences</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_alerte_accueil_triage_urgences"><bpmn:incoming>Flux_interne_2_alerte_accueil_triage_urgences</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_alerte_accueil_triage_urgences" sourceRef="Debut_interne_alerte_accueil_triage_urgences" targetRef="Etapes_internes_alerte_accueil_triage_urgences" />
+      <bpmn:sequenceFlow id="Flux_interne_2_alerte_accueil_triage_urgences" sourceRef="Etapes_internes_alerte_accueil_triage_urgences" targetRef="Fin_interne_alerte_accueil_triage_urgences" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="orienter_accueil_triage_urgences" name="Attribuer une filière de soins">
+      <bpmn:incoming>Flux_8_accueil_triage_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_accueil_triage_urgences</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="attente_accueil_triage_urgences" name="Délai de réévaluation">
+      <bpmn:incoming>Flux_9_accueil_triage_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_accueil_triage_urgences</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="Definition_temps_attente_accueil_triage_urgences" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="transmettre_accueil_triage_urgences" name="Transmettre au secteur clinique">
+      <bpmn:incoming>Flux_10_accueil_triage_urgences</bpmn:incoming>
+      <bpmn:incoming>Flux_11_accueil_triage_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_accueil_triage_urgences</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="fin_accueil_triage_urgences" name="Triage terminé">
+      <bpmn:incoming>Flux_12_accueil_triage_urgences</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_accueil_triage_urgences" sourceRef="debut_accueil_triage_urgences" targetRef="enregistrer_accueil_triage_urgences" />
+    <bpmn:sequenceFlow id="Flux_2_accueil_triage_urgences" sourceRef="enregistrer_accueil_triage_urgences" targetRef="constantes_accueil_triage_urgences" />
+    <bpmn:sequenceFlow id="Flux_3_accueil_triage_urgences" name="Exception" sourceRef="identite_accueil_triage_urgences" targetRef="provisoire_accueil_triage_urgences" />
+    <bpmn:sequenceFlow id="Flux_4_accueil_triage_urgences" sourceRef="provisoire_accueil_triage_urgences" targetRef="constantes_accueil_triage_urgences" />
+    <bpmn:sequenceFlow id="Flux_5_accueil_triage_urgences" sourceRef="constantes_accueil_triage_urgences" targetRef="triage_accueil_triage_urgences" />
+    <bpmn:sequenceFlow id="Flux_6_accueil_triage_urgences" sourceRef="triage_accueil_triage_urgences" targetRef="gravite_accueil_triage_urgences" />
+    <bpmn:sequenceFlow id="Flux_7_accueil_triage_urgences" name="Oui" sourceRef="gravite_accueil_triage_urgences" targetRef="alerte_accueil_triage_urgences" />
+    <bpmn:sequenceFlow id="Flux_8_accueil_triage_urgences" name="Non" sourceRef="gravite_accueil_triage_urgences" targetRef="orienter_accueil_triage_urgences" />
+    <bpmn:sequenceFlow id="Flux_9_accueil_triage_urgences" sourceRef="orienter_accueil_triage_urgences" targetRef="attente_accueil_triage_urgences" />
+    <bpmn:sequenceFlow id="Flux_10_accueil_triage_urgences" sourceRef="attente_accueil_triage_urgences" targetRef="transmettre_accueil_triage_urgences" />
+    <bpmn:sequenceFlow id="Flux_11_accueil_triage_urgences" sourceRef="alerte_accueil_triage_urgences" targetRef="transmettre_accueil_triage_urgences" />
+    <bpmn:sequenceFlow id="Flux_12_accueil_triage_urgences" sourceRef="transmettre_accueil_triage_urgences" targetRef="fin_accueil_triage_urgences" />
+    <bpmn:dataObject id="Objet_fiche_triage_accueil_triage_urgences" />
+    <bpmn:dataObjectReference id="Document_fiche_triage_accueil_triage_urgences" name="Fiche de triage et constantes" dataObjectRef="Objet_fiche_triage_accueil_triage_urgences" />
+    <bpmn:association id="Association_fiche_triage_accueil_triage_urgences" sourceRef="Document_fiche_triage_accueil_triage_urgences" targetRef="triage_accueil_triage_urgences" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_accueil_triage_urgences">
+    <bpmndi:BPMNPlane id="Plan_accueil_triage_urgences" bpmnElement="Processus_accueil_triage_urgences">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_accueil_triage_urgences" bpmnElement="Couloir_1_accueil_triage_urgences" isHorizontal="true"><dc:Bounds x="20" y="30" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_accueil_triage_urgences" bpmnElement="Couloir_2_accueil_triage_urgences" isHorizontal="true"><dc:Bounds x="20" y="250" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_accueil_triage_urgences" bpmnElement="Couloir_3_accueil_triage_urgences" isHorizontal="true"><dc:Bounds x="20" y="470" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_accueil_triage_urgences" bpmnElement="debut_accueil_triage_urgences"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_enregistrer_accueil_triage_urgences" bpmnElement="enregistrer_accueil_triage_urgences"><dc:Bounds x="240" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_identite_accueil_triage_urgences" bpmnElement="identite_accueil_triage_urgences"><dc:Bounds x="362" y="162" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_provisoire_accueil_triage_urgences" bpmnElement="provisoire_accueil_triage_urgences"><dc:Bounds x="420" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_constantes_accueil_triage_urgences" bpmnElement="constantes_accueil_triage_urgences"><dc:Bounds x="420" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_triage_accueil_triage_urgences" bpmnElement="triage_accueil_triage_urgences" isExpanded="false"><dc:Bounds x="600" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_gravite_accueil_triage_urgences" bpmnElement="gravite_accueil_triage_urgences" isMarkerVisible="true"><dc:Bounds x="780" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_alerte_accueil_triage_urgences" bpmnElement="alerte_accueil_triage_urgences" isExpanded="false"><dc:Bounds x="960" y="538" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_orienter_accueil_triage_urgences" bpmnElement="orienter_accueil_triage_urgences"><dc:Bounds x="960" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_attente_accueil_triage_urgences" bpmnElement="attente_accueil_triage_urgences"><dc:Bounds x="1140" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_transmettre_accueil_triage_urgences" bpmnElement="transmettre_accueil_triage_urgences"><dc:Bounds x="1320" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_accueil_triage_urgences" bpmnElement="fin_accueil_triage_urgences"><dc:Bounds x="1500" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_fiche_triage_accueil_triage_urgences" bpmnElement="Document_fiche_triage_accueil_triage_urgences"><dc:Bounds x="730" y="412" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_accueil_triage_urgences" bpmnElement="Flux_1_accueil_triage_urgences"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="140" /><di:waypoint x="240" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_accueil_triage_urgences" bpmnElement="Flux_2_accueil_triage_urgences"><di:waypoint x="380" y="140" /><di:waypoint x="400" y="140" /><di:waypoint x="400" y="360" /><di:waypoint x="420" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_accueil_triage_urgences" bpmnElement="Flux_3_accueil_triage_urgences"><di:waypoint x="392" y="177" /><di:waypoint x="406" y="177" /><di:waypoint x="406" y="140" /><di:waypoint x="420" y="140" /><bpmndi:BPMNLabel><dc:Bounds x="391" y="83" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_accueil_triage_urgences" bpmnElement="Flux_4_accueil_triage_urgences"><di:waypoint x="560" y="140" /><di:waypoint x="588" y="140" /><di:waypoint x="588" y="431" /><di:waypoint x="392" y="431" /><di:waypoint x="392" y="360" /><di:waypoint x="420" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_accueil_triage_urgences" bpmnElement="Flux_5_accueil_triage_urgences"><di:waypoint x="560" y="360" /><di:waypoint x="600" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_accueil_triage_urgences" bpmnElement="Flux_6_accueil_triage_urgences"><di:waypoint x="750" y="361" /><di:waypoint x="765" y="361" /><di:waypoint x="765" y="353" /><di:waypoint x="780" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_accueil_triage_urgences" bpmnElement="Flux_7_accueil_triage_urgences"><di:waypoint x="830" y="353" /><di:waypoint x="895" y="353" /><di:waypoint x="895" y="581" /><di:waypoint x="960" y="581" /><bpmndi:BPMNLabel><dc:Bounds x="870" y="308" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_accueil_triage_urgences" bpmnElement="Flux_8_accueil_triage_urgences"><di:waypoint x="830" y="353" /><di:waypoint x="895" y="353" /><di:waypoint x="895" y="360" /><di:waypoint x="960" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="870" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_accueil_triage_urgences" bpmnElement="Flux_9_accueil_triage_urgences"><di:waypoint x="1100" y="360" /><di:waypoint x="1120" y="360" /><di:waypoint x="1120" y="354" /><di:waypoint x="1140" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_accueil_triage_urgences" bpmnElement="Flux_10_accueil_triage_urgences"><di:waypoint x="1176" y="354" /><di:waypoint x="1248" y="354" /><di:waypoint x="1248" y="580" /><di:waypoint x="1320" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_accueil_triage_urgences" bpmnElement="Flux_11_accueil_triage_urgences"><di:waypoint x="1110" y="581" /><di:waypoint x="1320" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_accueil_triage_urgences" bpmnElement="Flux_12_accueil_triage_urgences"><di:waypoint x="1460" y="580" /><di:waypoint x="1480" y="580" /><di:waypoint x="1480" y="574" /><di:waypoint x="1500" y="574" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_fiche_triage_accueil_triage_urgences" bpmnElement="Association_fiche_triage_accueil_triage_urgences"><di:waypoint x="748" y="436" /><di:waypoint x="675" y="404" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

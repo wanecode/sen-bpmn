@@ -1,0 +1,12 @@
+changelog:
+  categories:
+    - title: Processus BPMN
+      labels: [processus]
+    - title: Interface et fonctionnalités
+      labels: [enhancement, frontend]
+    - title: Corrections
+      labels: [bug]
+    - title: Documentation et infrastructure
+      labels: [documentation, infrastructure]
+    - title: Autres changements
+      labels: ["*"]

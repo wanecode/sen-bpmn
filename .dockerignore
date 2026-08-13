@@ -1,0 +1,14 @@
+.git
+.github
+.next
+node_modules
+data/*.sqlite
+data/*.sqlite-*
+.env
+.env.*
+!.env.example
+npm-debug.log*
+*.png
+*.webm
+*.zip
+.DS_Store

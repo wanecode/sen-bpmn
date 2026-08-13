@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_orientation_apres_urgences" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_orientation_apres_urgences" name="Message métier" />
+  <bpmn:error id="Erreur_orientation_apres_urgences" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_orientation_apres_urgences" name="Orientation après consultation aux urgences" isExecutable="false">
+    <bpmn:documentation>Formaliser la décision de sortie, d’observation, d’hospitalisation ou de transfert après l’évaluation médicale. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_orientation_apres_urgences">
+      <bpmn:lane id="Couloir_1_orientation_apres_urgences" name="Médecin urgentiste">
+        <bpmn:flowNodeRef>debut_orientation_apres_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>synthese_orientation_apres_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>decision_orientation_apres_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>cloture_orientation_apres_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_orientation_apres_urgences</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_orientation_apres_urgences" name="Gestionnaire des lits">
+        <bpmn:flowNodeRef>demande_lit_orientation_apres_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>attente_lit_orientation_apres_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>delai_orientation_apres_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>escalade_orientation_apres_urgences</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_orientation_apres_urgences" name="Unité d’aval ou patient">
+        <bpmn:flowNodeRef>sortie_orientation_apres_urgences</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>transfert_orientation_apres_urgences</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_orientation_apres_urgences" name="Évaluation médicale achevée">
+      <bpmn:outgoing>Flux_1_orientation_apres_urgences</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="synthese_orientation_apres_urgences" name="Rédiger la synthèse clinique">
+      <bpmn:incoming>Flux_1_orientation_apres_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_orientation_apres_urgences</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="decision_orientation_apres_urgences" name="Hospitalisation requise ?">
+      <bpmn:incoming>Flux_2_orientation_apres_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_orientation_apres_urgences</bpmn:outgoing>
+      <bpmn:outgoing>Flux_4_orientation_apres_urgences</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="demande_lit_orientation_apres_urgences" name="Émettre une demande de lit">
+      <bpmn:incoming>Flux_3_orientation_apres_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_orientation_apres_urgences</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="attente_lit_orientation_apres_urgences" name="Réponse de l’unité">
+      <bpmn:incoming>Flux_5_orientation_apres_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_orientation_apres_urgences</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_attente_lit_orientation_apres_urgences" messageRef="Message_orientation_apres_urgences" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:boundaryEvent id="delai_orientation_apres_urgences" name="Délai dépassé" attachedToRef="demande_lit_orientation_apres_urgences" cancelActivity="true">
+      <bpmn:outgoing>Flux_7_orientation_apres_urgences</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="Definition_temps_delai_orientation_apres_urgences" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="escalade_orientation_apres_urgences" name="Escalader la recherche de lit">
+      <bpmn:incoming>Flux_7_orientation_apres_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_orientation_apres_urgences</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="sortie_orientation_apres_urgences" name="Préparer la sortie sécurisée">
+      <bpmn:incoming>Flux_4_orientation_apres_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_orientation_apres_urgences</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_sortie_orientation_apres_urgences"><bpmn:outgoing>Flux_interne_1_sortie_orientation_apres_urgences</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_sortie_orientation_apres_urgences" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_sortie_orientation_apres_urgences</bpmn:incoming><bpmn:outgoing>Flux_interne_2_sortie_orientation_apres_urgences</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_sortie_orientation_apres_urgences"><bpmn:incoming>Flux_interne_2_sortie_orientation_apres_urgences</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_sortie_orientation_apres_urgences" sourceRef="Debut_interne_sortie_orientation_apres_urgences" targetRef="Etapes_internes_sortie_orientation_apres_urgences" />
+      <bpmn:sequenceFlow id="Flux_interne_2_sortie_orientation_apres_urgences" sourceRef="Etapes_internes_sortie_orientation_apres_urgences" targetRef="Fin_interne_sortie_orientation_apres_urgences" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="transfert_orientation_apres_urgences" name="Transmettre à l’unité d’aval">
+      <bpmn:incoming>Flux_6_orientation_apres_urgences</bpmn:incoming>
+      <bpmn:incoming>Flux_8_orientation_apres_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_orientation_apres_urgences</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="cloture_orientation_apres_urgences" name="Clôturer le passage">
+      <bpmn:incoming>Flux_9_orientation_apres_urgences</bpmn:incoming>
+      <bpmn:incoming>Flux_10_orientation_apres_urgences</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_orientation_apres_urgences</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="fin_orientation_apres_urgences" name="Patient orienté">
+      <bpmn:incoming>Flux_11_orientation_apres_urgences</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_orientation_apres_urgences" sourceRef="debut_orientation_apres_urgences" targetRef="synthese_orientation_apres_urgences" />
+    <bpmn:sequenceFlow id="Flux_2_orientation_apres_urgences" sourceRef="synthese_orientation_apres_urgences" targetRef="decision_orientation_apres_urgences" />
+    <bpmn:sequenceFlow id="Flux_3_orientation_apres_urgences" name="Oui" sourceRef="decision_orientation_apres_urgences" targetRef="demande_lit_orientation_apres_urgences" />
+    <bpmn:sequenceFlow id="Flux_4_orientation_apres_urgences" name="Non" sourceRef="decision_orientation_apres_urgences" targetRef="sortie_orientation_apres_urgences" />
+    <bpmn:sequenceFlow id="Flux_5_orientation_apres_urgences" sourceRef="demande_lit_orientation_apres_urgences" targetRef="attente_lit_orientation_apres_urgences" />
+    <bpmn:sequenceFlow id="Flux_6_orientation_apres_urgences" sourceRef="attente_lit_orientation_apres_urgences" targetRef="transfert_orientation_apres_urgences" />
+    <bpmn:sequenceFlow id="Flux_7_orientation_apres_urgences" name="Exception" sourceRef="delai_orientation_apres_urgences" targetRef="escalade_orientation_apres_urgences" />
+    <bpmn:sequenceFlow id="Flux_8_orientation_apres_urgences" sourceRef="escalade_orientation_apres_urgences" targetRef="transfert_orientation_apres_urgences" />
+    <bpmn:sequenceFlow id="Flux_9_orientation_apres_urgences" sourceRef="sortie_orientation_apres_urgences" targetRef="cloture_orientation_apres_urgences" />
+    <bpmn:sequenceFlow id="Flux_10_orientation_apres_urgences" sourceRef="transfert_orientation_apres_urgences" targetRef="cloture_orientation_apres_urgences" />
+    <bpmn:sequenceFlow id="Flux_11_orientation_apres_urgences" sourceRef="cloture_orientation_apres_urgences" targetRef="fin_orientation_apres_urgences" />
+    <bpmn:dataObject id="Objet_resume_orientation_apres_urgences" />
+    <bpmn:dataObjectReference id="Document_resume_orientation_apres_urgences" name="Résumé du passage aux urgences" dataObjectRef="Objet_resume_orientation_apres_urgences" />
+    <bpmn:association id="Association_resume_orientation_apres_urgences" sourceRef="Document_resume_orientation_apres_urgences" targetRef="synthese_orientation_apres_urgences" associationDirection="One" />
+    <bpmn:dataObject id="Objet_liaison_orientation_apres_urgences" />
+    <bpmn:dataObjectReference id="Document_liaison_orientation_apres_urgences" name="Fiche de liaison" dataObjectRef="Objet_liaison_orientation_apres_urgences" />
+    <bpmn:association id="Association_liaison_orientation_apres_urgences" sourceRef="Document_liaison_orientation_apres_urgences" targetRef="transfert_orientation_apres_urgences" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_orientation_apres_urgences">
+    <bpmndi:BPMNPlane id="Plan_orientation_apres_urgences" bpmnElement="Processus_orientation_apres_urgences">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_orientation_apres_urgences" bpmnElement="Couloir_1_orientation_apres_urgences" isHorizontal="true"><dc:Bounds x="20" y="30" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_orientation_apres_urgences" bpmnElement="Couloir_2_orientation_apres_urgences" isHorizontal="true"><dc:Bounds x="20" y="250" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_orientation_apres_urgences" bpmnElement="Couloir_3_orientation_apres_urgences" isHorizontal="true"><dc:Bounds x="20" y="470" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_orientation_apres_urgences" bpmnElement="debut_orientation_apres_urgences"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_synthese_orientation_apres_urgences" bpmnElement="synthese_orientation_apres_urgences"><dc:Bounds x="240" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_decision_orientation_apres_urgences" bpmnElement="decision_orientation_apres_urgences" isMarkerVisible="true"><dc:Bounds x="420" y="108" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_demande_lit_orientation_apres_urgences" bpmnElement="demande_lit_orientation_apres_urgences"><dc:Bounds x="600" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_attente_lit_orientation_apres_urgences" bpmnElement="attente_lit_orientation_apres_urgences"><dc:Bounds x="780" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_delai_orientation_apres_urgences" bpmnElement="delai_orientation_apres_urgences"><dc:Bounds x="722" y="382" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_escalade_orientation_apres_urgences" bpmnElement="escalade_orientation_apres_urgences"><dc:Bounds x="960" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_sortie_orientation_apres_urgences" bpmnElement="sortie_orientation_apres_urgences" isExpanded="false"><dc:Bounds x="600" y="538" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_transfert_orientation_apres_urgences" bpmnElement="transfert_orientation_apres_urgences"><dc:Bounds x="1140" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_cloture_orientation_apres_urgences" bpmnElement="cloture_orientation_apres_urgences"><dc:Bounds x="1320" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_orientation_apres_urgences" bpmnElement="fin_orientation_apres_urgences"><dc:Bounds x="1500" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_resume_orientation_apres_urgences" bpmnElement="Document_resume_orientation_apres_urgences"><dc:Bounds x="360" y="189" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_liaison_orientation_apres_urgences" bpmnElement="Document_liaison_orientation_apres_urgences"><dc:Bounds x="1260" y="629" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_orientation_apres_urgences" bpmnElement="Flux_1_orientation_apres_urgences"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="140" /><di:waypoint x="240" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_orientation_apres_urgences" bpmnElement="Flux_2_orientation_apres_urgences"><di:waypoint x="380" y="140" /><di:waypoint x="400" y="140" /><di:waypoint x="400" y="133" /><di:waypoint x="420" y="133" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_orientation_apres_urgences" bpmnElement="Flux_3_orientation_apres_urgences"><di:waypoint x="470" y="133" /><di:waypoint x="535" y="133" /><di:waypoint x="535" y="360" /><di:waypoint x="600" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="510" y="88" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_orientation_apres_urgences" bpmnElement="Flux_4_orientation_apres_urgences"><di:waypoint x="470" y="133" /><di:waypoint x="535" y="133" /><di:waypoint x="535" y="581" /><di:waypoint x="600" y="581" /><bpmndi:BPMNLabel><dc:Bounds x="510" y="88" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_orientation_apres_urgences" bpmnElement="Flux_5_orientation_apres_urgences"><di:waypoint x="740" y="360" /><di:waypoint x="760" y="360" /><di:waypoint x="760" y="354" /><di:waypoint x="780" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_orientation_apres_urgences" bpmnElement="Flux_6_orientation_apres_urgences"><di:waypoint x="816" y="354" /><di:waypoint x="978" y="354" /><di:waypoint x="978" y="580" /><di:waypoint x="1140" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_orientation_apres_urgences" bpmnElement="Flux_7_orientation_apres_urgences"><di:waypoint x="752" y="397" /><di:waypoint x="856" y="397" /><di:waypoint x="856" y="360" /><di:waypoint x="960" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="841" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_orientation_apres_urgences" bpmnElement="Flux_8_orientation_apres_urgences"><di:waypoint x="1100" y="360" /><di:waypoint x="1120" y="360" /><di:waypoint x="1120" y="580" /><di:waypoint x="1140" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_orientation_apres_urgences" bpmnElement="Flux_9_orientation_apres_urgences"><di:waypoint x="750" y="581" /><di:waypoint x="1035" y="581" /><di:waypoint x="1035" y="140" /><di:waypoint x="1320" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_orientation_apres_urgences" bpmnElement="Flux_10_orientation_apres_urgences"><di:waypoint x="1280" y="580" /><di:waypoint x="1300" y="580" /><di:waypoint x="1300" y="140" /><di:waypoint x="1320" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_orientation_apres_urgences" bpmnElement="Flux_11_orientation_apres_urgences"><di:waypoint x="1460" y="140" /><di:waypoint x="1480" y="140" /><di:waypoint x="1480" y="134" /><di:waypoint x="1500" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_resume_orientation_apres_urgences" bpmnElement="Association_resume_orientation_apres_urgences"><di:waypoint x="378" y="213" /><di:waypoint x="310" y="177" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_liaison_orientation_apres_urgences" bpmnElement="Association_liaison_orientation_apres_urgences"><di:waypoint x="1278" y="653" /><di:waypoint x="1210" y="617" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

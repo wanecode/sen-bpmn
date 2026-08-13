@@ -1,0 +1,48 @@
+name: Proposer ou corriger un processus
+description: Nouveau parcours, erreur métier, source ou évolution d’un BPMN.
+title: "[Processus] "
+labels: [processus, validation-metier]
+body:
+  - type: markdown
+    attributes:
+      value: Une proposition reste un brouillon tant qu’une instance locale compétente ne l’a pas validée.
+  - type: input
+    id: process
+    attributes:
+      label: Processus concerné
+      placeholder: Accueil et triage aux urgences
+    validations:
+      required: true
+  - type: textarea
+    id: need
+    attributes:
+      label: Besoin ou modification proposée
+      description: Précisez les rôles, décisions, exceptions et documents affectés.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Contexte d’application
+      description: Type d’établissement, niveau de soins, région ou district.
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources de cadrage
+      description: Liens vers les textes, recommandations ou protocoles communicables.
+    validations:
+      required: true
+  - type: input
+    id: reviewer
+    attributes:
+      label: Relecteur ou instance métier
+      description: À renseigner uniquement avec son accord. Laisser vide si aucun relecteur n’est engagé.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Confidentialité
+      options:
+        - label: La proposition ne contient aucune donnée personnelle ou donnée de patient.
+          required: true

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_urgence_obstetricale" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_urgence_obstetricale" name="Message métier" />
+  <bpmn:error id="Erreur_urgence_obstetricale" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_urgence_obstetricale" name="Prise en charge d’une urgence obstétricale" isExecutable="false">
+    <bpmn:documentation>Mobiliser sans délai l’équipe et les moyens requis face à une complication maternelle ou fœtale grave. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_urgence_obstetricale">
+      <bpmn:lane id="Couloir_1_urgence_obstetricale" name="Sage-femme de garde">
+        <bpmn:flowNodeRef>debut_urgence_obstetricale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>alerte_urgence_obstetricale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>evaluer_urgence_obstetricale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>surveillance_urgence_obstetricale</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_urgence_obstetricale" name="Équipe obstétricale / bloc">
+        <bpmn:flowNodeRef>equipe_urgence_obstetricale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_urgence_obstetricale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>merge_urgence_obstetricale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>extraction_urgence_obstetricale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>bloc_urgence_obstetricale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>indispo_urgence_obstetricale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>post_urgence_obstetricale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_urgence_obstetricale</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_urgence_obstetricale" name="Réanimation et banque de sang">
+        <bpmn:flowNodeRef>stabiliser_urgence_obstetricale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>transfert_urgence_obstetricale</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_urgence_obstetricale" name="Urgence obstétricale reconnue">
+      <bpmn:outgoing>Flux_1_urgence_obstetricale</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="alerte_urgence_obstetricale" name="Déclencher l’alerte obstétricale">
+      <bpmn:incoming>Flux_1_urgence_obstetricale</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_urgence_obstetricale</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="equipe_urgence_obstetricale" name="Équipe mobilisée">
+      <bpmn:incoming>Flux_2_urgence_obstetricale</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_urgence_obstetricale</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_equipe_urgence_obstetricale" messageRef="Message_urgence_obstetricale" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:parallelGateway id="split_urgence_obstetricale" name="Réponse immédiate">
+      <bpmn:incoming>Flux_3_urgence_obstetricale</bpmn:incoming>
+      <bpmn:outgoing>Flux_4_urgence_obstetricale</bpmn:outgoing>
+      <bpmn:outgoing>Flux_5_urgence_obstetricale</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="evaluer_urgence_obstetricale" name="Évaluer la mère et le fœtus">
+      <bpmn:incoming>Flux_4_urgence_obstetricale</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_urgence_obstetricale</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="stabiliser_urgence_obstetricale" name="Stabiliser et préparer les produits">
+      <bpmn:incoming>Flux_5_urgence_obstetricale</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_urgence_obstetricale</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_stabiliser_urgence_obstetricale"><bpmn:outgoing>Flux_interne_1_stabiliser_urgence_obstetricale</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_stabiliser_urgence_obstetricale" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_stabiliser_urgence_obstetricale</bpmn:incoming><bpmn:outgoing>Flux_interne_2_stabiliser_urgence_obstetricale</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_stabiliser_urgence_obstetricale"><bpmn:incoming>Flux_interne_2_stabiliser_urgence_obstetricale</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_stabiliser_urgence_obstetricale" sourceRef="Debut_interne_stabiliser_urgence_obstetricale" targetRef="Etapes_internes_stabiliser_urgence_obstetricale" />
+      <bpmn:sequenceFlow id="Flux_interne_2_stabiliser_urgence_obstetricale" sourceRef="Etapes_internes_stabiliser_urgence_obstetricale" targetRef="Fin_interne_stabiliser_urgence_obstetricale" />
+    </bpmn:subProcess>
+    <bpmn:parallelGateway id="merge_urgence_obstetricale" name="Décision obstétricale">
+      <bpmn:incoming>Flux_6_urgence_obstetricale</bpmn:incoming>
+      <bpmn:incoming>Flux_7_urgence_obstetricale</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_urgence_obstetricale</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="extraction_urgence_obstetricale" name="Extraction urgente ?">
+      <bpmn:incoming>Flux_8_urgence_obstetricale</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_urgence_obstetricale</bpmn:outgoing>
+      <bpmn:outgoing>Flux_10_urgence_obstetricale</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="bloc_urgence_obstetricale" name="Activer et préparer le bloc">
+      <bpmn:incoming>Flux_9_urgence_obstetricale</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_urgence_obstetricale</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_bloc_urgence_obstetricale"><bpmn:outgoing>Flux_interne_1_bloc_urgence_obstetricale</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_bloc_urgence_obstetricale" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_bloc_urgence_obstetricale</bpmn:incoming><bpmn:outgoing>Flux_interne_2_bloc_urgence_obstetricale</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_bloc_urgence_obstetricale"><bpmn:incoming>Flux_interne_2_bloc_urgence_obstetricale</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_bloc_urgence_obstetricale" sourceRef="Debut_interne_bloc_urgence_obstetricale" targetRef="Etapes_internes_bloc_urgence_obstetricale" />
+      <bpmn:sequenceFlow id="Flux_interne_2_bloc_urgence_obstetricale" sourceRef="Etapes_internes_bloc_urgence_obstetricale" targetRef="Fin_interne_bloc_urgence_obstetricale" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="indispo_urgence_obstetricale" name="Bloc indisponible" attachedToRef="bloc_urgence_obstetricale" cancelActivity="true">
+      <bpmn:outgoing>Flux_11_urgence_obstetricale</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="Definition_temps_indispo_urgence_obstetricale" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="transfert_urgence_obstetricale" name="Organiser un transfert médicalisé">
+      <bpmn:incoming>Flux_11_urgence_obstetricale</bpmn:incoming>
+      <bpmn:outgoing>Flux_13_urgence_obstetricale</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="surveillance_urgence_obstetricale" name="Poursuivre la surveillance renforcée">
+      <bpmn:incoming>Flux_10_urgence_obstetricale</bpmn:incoming>
+      <bpmn:outgoing>Flux_14_urgence_obstetricale</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="post_urgence_obstetricale" name="Assurer le suivi post-intervention">
+      <bpmn:incoming>Flux_12_urgence_obstetricale</bpmn:incoming>
+      <bpmn:incoming>Flux_13_urgence_obstetricale</bpmn:incoming>
+      <bpmn:incoming>Flux_14_urgence_obstetricale</bpmn:incoming>
+      <bpmn:outgoing>Flux_15_urgence_obstetricale</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_post_urgence_obstetricale"><bpmn:outgoing>Flux_interne_1_post_urgence_obstetricale</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_post_urgence_obstetricale" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_post_urgence_obstetricale</bpmn:incoming><bpmn:outgoing>Flux_interne_2_post_urgence_obstetricale</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_post_urgence_obstetricale"><bpmn:incoming>Flux_interne_2_post_urgence_obstetricale</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_post_urgence_obstetricale" sourceRef="Debut_interne_post_urgence_obstetricale" targetRef="Etapes_internes_post_urgence_obstetricale" />
+      <bpmn:sequenceFlow id="Flux_interne_2_post_urgence_obstetricale" sourceRef="Etapes_internes_post_urgence_obstetricale" targetRef="Fin_interne_post_urgence_obstetricale" />
+    </bpmn:subProcess>
+    <bpmn:endEvent id="fin_urgence_obstetricale" name="Relais obstétrical assuré">
+      <bpmn:incoming>Flux_15_urgence_obstetricale</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_urgence_obstetricale" sourceRef="debut_urgence_obstetricale" targetRef="alerte_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_2_urgence_obstetricale" sourceRef="alerte_urgence_obstetricale" targetRef="equipe_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_3_urgence_obstetricale" sourceRef="equipe_urgence_obstetricale" targetRef="split_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_4_urgence_obstetricale" sourceRef="split_urgence_obstetricale" targetRef="evaluer_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_5_urgence_obstetricale" sourceRef="split_urgence_obstetricale" targetRef="stabiliser_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_6_urgence_obstetricale" sourceRef="evaluer_urgence_obstetricale" targetRef="merge_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_7_urgence_obstetricale" sourceRef="stabiliser_urgence_obstetricale" targetRef="merge_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_8_urgence_obstetricale" sourceRef="merge_urgence_obstetricale" targetRef="extraction_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_9_urgence_obstetricale" name="Oui" sourceRef="extraction_urgence_obstetricale" targetRef="bloc_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_10_urgence_obstetricale" name="Non" sourceRef="extraction_urgence_obstetricale" targetRef="surveillance_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_11_urgence_obstetricale" name="Exception" sourceRef="indispo_urgence_obstetricale" targetRef="transfert_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_12_urgence_obstetricale" sourceRef="bloc_urgence_obstetricale" targetRef="post_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_13_urgence_obstetricale" sourceRef="transfert_urgence_obstetricale" targetRef="post_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_14_urgence_obstetricale" sourceRef="surveillance_urgence_obstetricale" targetRef="post_urgence_obstetricale" />
+    <bpmn:sequenceFlow id="Flux_15_urgence_obstetricale" sourceRef="post_urgence_obstetricale" targetRef="fin_urgence_obstetricale" />
+    <bpmn:dataObject id="Objet_checklist_obst_urgence_obstetricale" />
+    <bpmn:dataObjectReference id="Document_checklist_obst_urgence_obstetricale" name="Checklist d’urgence obstétricale" dataObjectRef="Objet_checklist_obst_urgence_obstetricale" />
+    <bpmn:association id="Association_checklist_obst_urgence_obstetricale" sourceRef="Document_checklist_obst_urgence_obstetricale" targetRef="evaluer_urgence_obstetricale" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_urgence_obstetricale">
+    <bpmndi:BPMNPlane id="Plan_urgence_obstetricale" bpmnElement="Processus_urgence_obstetricale">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_urgence_obstetricale" bpmnElement="Couloir_1_urgence_obstetricale" isHorizontal="true"><dc:Bounds x="20" y="30" width="2170" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_urgence_obstetricale" bpmnElement="Couloir_2_urgence_obstetricale" isHorizontal="true"><dc:Bounds x="20" y="250" width="2170" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_urgence_obstetricale" bpmnElement="Couloir_3_urgence_obstetricale" isHorizontal="true"><dc:Bounds x="20" y="470" width="2170" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_urgence_obstetricale" bpmnElement="debut_urgence_obstetricale"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_alerte_urgence_obstetricale" bpmnElement="alerte_urgence_obstetricale"><dc:Bounds x="240" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_equipe_urgence_obstetricale" bpmnElement="equipe_urgence_obstetricale"><dc:Bounds x="420" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_split_urgence_obstetricale" bpmnElement="split_urgence_obstetricale" isMarkerVisible="true"><dc:Bounds x="600" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_evaluer_urgence_obstetricale" bpmnElement="evaluer_urgence_obstetricale"><dc:Bounds x="780" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_stabiliser_urgence_obstetricale" bpmnElement="stabiliser_urgence_obstetricale" isExpanded="false"><dc:Bounds x="780" y="538" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_merge_urgence_obstetricale" bpmnElement="merge_urgence_obstetricale" isMarkerVisible="true"><dc:Bounds x="960" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_extraction_urgence_obstetricale" bpmnElement="extraction_urgence_obstetricale" isMarkerVisible="true"><dc:Bounds x="1140" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_bloc_urgence_obstetricale" bpmnElement="bloc_urgence_obstetricale" isExpanded="false"><dc:Bounds x="1320" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_indispo_urgence_obstetricale" bpmnElement="indispo_urgence_obstetricale"><dc:Bounds x="1452" y="389" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_transfert_urgence_obstetricale" bpmnElement="transfert_urgence_obstetricale"><dc:Bounds x="1500" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_surveillance_urgence_obstetricale" bpmnElement="surveillance_urgence_obstetricale"><dc:Bounds x="1320" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_post_urgence_obstetricale" bpmnElement="post_urgence_obstetricale" isExpanded="false"><dc:Bounds x="1680" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_urgence_obstetricale" bpmnElement="fin_urgence_obstetricale"><dc:Bounds x="1860" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_checklist_obst_urgence_obstetricale" bpmnElement="Document_checklist_obst_urgence_obstetricale"><dc:Bounds x="900" y="189" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_urgence_obstetricale" bpmnElement="Flux_1_urgence_obstetricale"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="140" /><di:waypoint x="240" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_urgence_obstetricale" bpmnElement="Flux_2_urgence_obstetricale"><di:waypoint x="380" y="140" /><di:waypoint x="400" y="140" /><di:waypoint x="400" y="354" /><di:waypoint x="420" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_urgence_obstetricale" bpmnElement="Flux_3_urgence_obstetricale"><di:waypoint x="456" y="354" /><di:waypoint x="600" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_urgence_obstetricale" bpmnElement="Flux_4_urgence_obstetricale"><di:waypoint x="650" y="353" /><di:waypoint x="715" y="353" /><di:waypoint x="715" y="140" /><di:waypoint x="780" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_urgence_obstetricale" bpmnElement="Flux_5_urgence_obstetricale"><di:waypoint x="650" y="353" /><di:waypoint x="715" y="353" /><di:waypoint x="715" y="581" /><di:waypoint x="780" y="581" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_urgence_obstetricale" bpmnElement="Flux_6_urgence_obstetricale"><di:waypoint x="920" y="140" /><di:waypoint x="940" y="140" /><di:waypoint x="940" y="353" /><di:waypoint x="960" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_urgence_obstetricale" bpmnElement="Flux_7_urgence_obstetricale"><di:waypoint x="930" y="581" /><di:waypoint x="945" y="581" /><di:waypoint x="945" y="353" /><di:waypoint x="960" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_urgence_obstetricale" bpmnElement="Flux_8_urgence_obstetricale"><di:waypoint x="1010" y="353" /><di:waypoint x="1140" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_urgence_obstetricale" bpmnElement="Flux_9_urgence_obstetricale"><di:waypoint x="1190" y="353" /><di:waypoint x="1255" y="353" /><di:waypoint x="1255" y="361" /><di:waypoint x="1320" y="361" /><bpmndi:BPMNLabel><dc:Bounds x="1230" y="298" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_urgence_obstetricale" bpmnElement="Flux_10_urgence_obstetricale"><di:waypoint x="1190" y="353" /><di:waypoint x="1255" y="353" /><di:waypoint x="1255" y="140" /><di:waypoint x="1320" y="140" /><bpmndi:BPMNLabel><dc:Bounds x="1230" y="83" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_urgence_obstetricale" bpmnElement="Flux_11_urgence_obstetricale"><di:waypoint x="1482" y="404" /><di:waypoint x="1491" y="404" /><di:waypoint x="1491" y="580" /><di:waypoint x="1500" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="1476" y="369" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_urgence_obstetricale" bpmnElement="Flux_12_urgence_obstetricale"><di:waypoint x="1470" y="361" /><di:waypoint x="1680" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_13_urgence_obstetricale" bpmnElement="Flux_13_urgence_obstetricale"><di:waypoint x="1640" y="580" /><di:waypoint x="1660" y="580" /><di:waypoint x="1660" y="361" /><di:waypoint x="1680" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_14_urgence_obstetricale" bpmnElement="Flux_14_urgence_obstetricale"><di:waypoint x="1460" y="140" /><di:waypoint x="1570" y="140" /><di:waypoint x="1570" y="361" /><di:waypoint x="1680" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_15_urgence_obstetricale" bpmnElement="Flux_15_urgence_obstetricale"><di:waypoint x="1830" y="361" /><di:waypoint x="1845" y="361" /><di:waypoint x="1845" y="354" /><di:waypoint x="1860" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_checklist_obst_urgence_obstetricale" bpmnElement="Association_checklist_obst_urgence_obstetricale"><di:waypoint x="918" y="213" /><di:waypoint x="850" y="177" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

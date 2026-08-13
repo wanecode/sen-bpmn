@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_reapprovisionnement_pharmacie" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_reapprovisionnement_pharmacie" name="Message métier" />
+  <bpmn:error id="Erreur_reapprovisionnement_pharmacie" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_reapprovisionnement_pharmacie" name="Réapprovisionnement de la pharmacie" isExecutable="false">
+    <bpmn:documentation>Surveiller les seuils, commander et réceptionner les médicaments tout en prévenant les ruptures. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_reapprovisionnement_pharmacie">
+      <bpmn:lane id="Couloir_1_reapprovisionnement_pharmacie" name="Gestionnaire de stock">
+        <bpmn:flowNodeRef>debut_reapprovisionnement_pharmacie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>analyser_reapprovisionnement_pharmacie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>besoin_reapprovisionnement_pharmacie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ranger_reapprovisionnement_pharmacie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_reapprovisionnement_pharmacie</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_reapprovisionnement_pharmacie" name="Achats / fournisseur">
+        <bpmn:flowNodeRef>commander_reapprovisionnement_pharmacie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>livraison_reapprovisionnement_pharmacie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>retard_reapprovisionnement_pharmacie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>relancer_reapprovisionnement_pharmacie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>reserve_reapprovisionnement_pharmacie</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_reapprovisionnement_pharmacie" name="Pharmacien responsable">
+        <bpmn:flowNodeRef>reception_reapprovisionnement_pharmacie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>nonconforme_reapprovisionnement_pharmacie</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_reapprovisionnement_pharmacie" name="Revue périodique du stock">
+      <bpmn:outgoing>Flux_1_reapprovisionnement_pharmacie</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="analyser_reapprovisionnement_pharmacie" name="Calculer consommation et seuils">
+      <bpmn:incoming>Flux_1_reapprovisionnement_pharmacie</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_reapprovisionnement_pharmacie</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="besoin_reapprovisionnement_pharmacie" name="Commande nécessaire ?">
+      <bpmn:incoming>Flux_2_reapprovisionnement_pharmacie</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_reapprovisionnement_pharmacie</bpmn:outgoing>
+      <bpmn:outgoing>Flux_4_reapprovisionnement_pharmacie</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="commander_reapprovisionnement_pharmacie" name="Émettre et autoriser la commande">
+      <bpmn:incoming>Flux_3_reapprovisionnement_pharmacie</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_reapprovisionnement_pharmacie</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="livraison_reapprovisionnement_pharmacie" name="Livraison reçue">
+      <bpmn:incoming>Flux_5_reapprovisionnement_pharmacie</bpmn:incoming>
+      <bpmn:incoming>Flux_7_reapprovisionnement_pharmacie</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_reapprovisionnement_pharmacie</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_livraison_reapprovisionnement_pharmacie" messageRef="Message_reapprovisionnement_pharmacie" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:boundaryEvent id="retard_reapprovisionnement_pharmacie" name="Livraison en retard" attachedToRef="commander_reapprovisionnement_pharmacie" cancelActivity="true">
+      <bpmn:outgoing>Flux_6_reapprovisionnement_pharmacie</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="Definition_temps_retard_reapprovisionnement_pharmacie" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="relancer_reapprovisionnement_pharmacie" name="Relancer et activer le stock de sécurité">
+      <bpmn:incoming>Flux_6_reapprovisionnement_pharmacie</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_reapprovisionnement_pharmacie</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="reception_reapprovisionnement_pharmacie" name="Contrôler quantité, qualité et température">
+      <bpmn:incoming>Flux_8_reapprovisionnement_pharmacie</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_reapprovisionnement_pharmacie</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_reception_reapprovisionnement_pharmacie"><bpmn:outgoing>Flux_interne_1_reception_reapprovisionnement_pharmacie</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_reception_reapprovisionnement_pharmacie" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_reception_reapprovisionnement_pharmacie</bpmn:incoming><bpmn:outgoing>Flux_interne_2_reception_reapprovisionnement_pharmacie</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_reception_reapprovisionnement_pharmacie"><bpmn:incoming>Flux_interne_2_reception_reapprovisionnement_pharmacie</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_reception_reapprovisionnement_pharmacie" sourceRef="Debut_interne_reception_reapprovisionnement_pharmacie" targetRef="Etapes_internes_reception_reapprovisionnement_pharmacie" />
+      <bpmn:sequenceFlow id="Flux_interne_2_reception_reapprovisionnement_pharmacie" sourceRef="Etapes_internes_reception_reapprovisionnement_pharmacie" targetRef="Fin_interne_reception_reapprovisionnement_pharmacie" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="nonconforme_reapprovisionnement_pharmacie" name="Livraison non conforme" attachedToRef="reception_reapprovisionnement_pharmacie" cancelActivity="true">
+      <bpmn:outgoing>Flux_9_reapprovisionnement_pharmacie</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_nonconforme_reapprovisionnement_pharmacie" errorRef="Erreur_reapprovisionnement_pharmacie" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="reserve_reapprovisionnement_pharmacie" name="Émettre une réserve fournisseur">
+      <bpmn:incoming>Flux_9_reapprovisionnement_pharmacie</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_reapprovisionnement_pharmacie</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:manualTask id="ranger_reapprovisionnement_pharmacie" name="Enregistrer et ranger selon FEFO">
+      <bpmn:incoming>Flux_11_reapprovisionnement_pharmacie</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_reapprovisionnement_pharmacie</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:endEvent id="fin_reapprovisionnement_pharmacie" name="Stock actualisé">
+      <bpmn:incoming>Flux_4_reapprovisionnement_pharmacie</bpmn:incoming>
+      <bpmn:incoming>Flux_10_reapprovisionnement_pharmacie</bpmn:incoming>
+      <bpmn:incoming>Flux_12_reapprovisionnement_pharmacie</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_reapprovisionnement_pharmacie" sourceRef="debut_reapprovisionnement_pharmacie" targetRef="analyser_reapprovisionnement_pharmacie" />
+    <bpmn:sequenceFlow id="Flux_2_reapprovisionnement_pharmacie" sourceRef="analyser_reapprovisionnement_pharmacie" targetRef="besoin_reapprovisionnement_pharmacie" />
+    <bpmn:sequenceFlow id="Flux_3_reapprovisionnement_pharmacie" name="Oui" sourceRef="besoin_reapprovisionnement_pharmacie" targetRef="commander_reapprovisionnement_pharmacie" />
+    <bpmn:sequenceFlow id="Flux_4_reapprovisionnement_pharmacie" name="Non" sourceRef="besoin_reapprovisionnement_pharmacie" targetRef="fin_reapprovisionnement_pharmacie" />
+    <bpmn:sequenceFlow id="Flux_5_reapprovisionnement_pharmacie" sourceRef="commander_reapprovisionnement_pharmacie" targetRef="livraison_reapprovisionnement_pharmacie" />
+    <bpmn:sequenceFlow id="Flux_6_reapprovisionnement_pharmacie" name="Exception" sourceRef="retard_reapprovisionnement_pharmacie" targetRef="relancer_reapprovisionnement_pharmacie" />
+    <bpmn:sequenceFlow id="Flux_7_reapprovisionnement_pharmacie" sourceRef="relancer_reapprovisionnement_pharmacie" targetRef="livraison_reapprovisionnement_pharmacie" />
+    <bpmn:sequenceFlow id="Flux_8_reapprovisionnement_pharmacie" sourceRef="livraison_reapprovisionnement_pharmacie" targetRef="reception_reapprovisionnement_pharmacie" />
+    <bpmn:sequenceFlow id="Flux_9_reapprovisionnement_pharmacie" name="Exception" sourceRef="nonconforme_reapprovisionnement_pharmacie" targetRef="reserve_reapprovisionnement_pharmacie" />
+    <bpmn:sequenceFlow id="Flux_10_reapprovisionnement_pharmacie" sourceRef="reserve_reapprovisionnement_pharmacie" targetRef="fin_reapprovisionnement_pharmacie" />
+    <bpmn:sequenceFlow id="Flux_11_reapprovisionnement_pharmacie" sourceRef="reception_reapprovisionnement_pharmacie" targetRef="ranger_reapprovisionnement_pharmacie" />
+    <bpmn:sequenceFlow id="Flux_12_reapprovisionnement_pharmacie" sourceRef="ranger_reapprovisionnement_pharmacie" targetRef="fin_reapprovisionnement_pharmacie" />
+    <bpmn:dataObject id="Objet_bon_commande_reapprovisionnement_pharmacie" />
+    <bpmn:dataObjectReference id="Document_bon_commande_reapprovisionnement_pharmacie" name="Bon de commande" dataObjectRef="Objet_bon_commande_reapprovisionnement_pharmacie" />
+    <bpmn:association id="Association_bon_commande_reapprovisionnement_pharmacie" sourceRef="Document_bon_commande_reapprovisionnement_pharmacie" targetRef="commander_reapprovisionnement_pharmacie" associationDirection="One" />
+    <bpmn:dataObject id="Objet_fiche_stock_reapprovisionnement_pharmacie" />
+    <bpmn:dataObjectReference id="Document_fiche_stock_reapprovisionnement_pharmacie" name="Fiche de stock et lot" dataObjectRef="Objet_fiche_stock_reapprovisionnement_pharmacie" />
+    <bpmn:association id="Association_fiche_stock_reapprovisionnement_pharmacie" sourceRef="Document_fiche_stock_reapprovisionnement_pharmacie" targetRef="ranger_reapprovisionnement_pharmacie" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_reapprovisionnement_pharmacie">
+    <bpmndi:BPMNPlane id="Plan_reapprovisionnement_pharmacie" bpmnElement="Processus_reapprovisionnement_pharmacie">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_reapprovisionnement_pharmacie" bpmnElement="Couloir_1_reapprovisionnement_pharmacie" isHorizontal="true"><dc:Bounds x="20" y="30" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_reapprovisionnement_pharmacie" bpmnElement="Couloir_2_reapprovisionnement_pharmacie" isHorizontal="true"><dc:Bounds x="20" y="250" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_reapprovisionnement_pharmacie" bpmnElement="Couloir_3_reapprovisionnement_pharmacie" isHorizontal="true"><dc:Bounds x="20" y="470" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_reapprovisionnement_pharmacie" bpmnElement="debut_reapprovisionnement_pharmacie"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_analyser_reapprovisionnement_pharmacie" bpmnElement="analyser_reapprovisionnement_pharmacie"><dc:Bounds x="240" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_besoin_reapprovisionnement_pharmacie" bpmnElement="besoin_reapprovisionnement_pharmacie" isMarkerVisible="true"><dc:Bounds x="420" y="108" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_commander_reapprovisionnement_pharmacie" bpmnElement="commander_reapprovisionnement_pharmacie"><dc:Bounds x="600" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_livraison_reapprovisionnement_pharmacie" bpmnElement="livraison_reapprovisionnement_pharmacie"><dc:Bounds x="780" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_retard_reapprovisionnement_pharmacie" bpmnElement="retard_reapprovisionnement_pharmacie"><dc:Bounds x="722" y="382" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_relancer_reapprovisionnement_pharmacie" bpmnElement="relancer_reapprovisionnement_pharmacie"><dc:Bounds x="960" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_reception_reapprovisionnement_pharmacie" bpmnElement="reception_reapprovisionnement_pharmacie" isExpanded="false"><dc:Bounds x="960" y="538" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_nonconforme_reapprovisionnement_pharmacie" bpmnElement="nonconforme_reapprovisionnement_pharmacie"><dc:Bounds x="1092" y="609" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_reserve_reapprovisionnement_pharmacie" bpmnElement="reserve_reapprovisionnement_pharmacie"><dc:Bounds x="1140" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_ranger_reapprovisionnement_pharmacie" bpmnElement="ranger_reapprovisionnement_pharmacie"><dc:Bounds x="1320" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_reapprovisionnement_pharmacie" bpmnElement="fin_reapprovisionnement_pharmacie"><dc:Bounds x="1500" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_bon_commande_reapprovisionnement_pharmacie" bpmnElement="Document_bon_commande_reapprovisionnement_pharmacie"><dc:Bounds x="720" y="409" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_fiche_stock_reapprovisionnement_pharmacie" bpmnElement="Document_fiche_stock_reapprovisionnement_pharmacie"><dc:Bounds x="1440" y="189" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_reapprovisionnement_pharmacie" bpmnElement="Flux_1_reapprovisionnement_pharmacie"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="140" /><di:waypoint x="240" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_reapprovisionnement_pharmacie" bpmnElement="Flux_2_reapprovisionnement_pharmacie"><di:waypoint x="380" y="140" /><di:waypoint x="400" y="140" /><di:waypoint x="400" y="133" /><di:waypoint x="420" y="133" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_reapprovisionnement_pharmacie" bpmnElement="Flux_3_reapprovisionnement_pharmacie"><di:waypoint x="470" y="133" /><di:waypoint x="535" y="133" /><di:waypoint x="535" y="360" /><di:waypoint x="600" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="510" y="88" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_reapprovisionnement_pharmacie" bpmnElement="Flux_4_reapprovisionnement_pharmacie"><di:waypoint x="470" y="133" /><di:waypoint x="1500" y="134" /><bpmndi:BPMNLabel><dc:Bounds x="960" y="88" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_reapprovisionnement_pharmacie" bpmnElement="Flux_5_reapprovisionnement_pharmacie"><di:waypoint x="740" y="360" /><di:waypoint x="760" y="360" /><di:waypoint x="760" y="354" /><di:waypoint x="780" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_reapprovisionnement_pharmacie" bpmnElement="Flux_6_reapprovisionnement_pharmacie"><di:waypoint x="752" y="397" /><di:waypoint x="856" y="397" /><di:waypoint x="856" y="360" /><di:waypoint x="960" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="841" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_reapprovisionnement_pharmacie" bpmnElement="Flux_7_reapprovisionnement_pharmacie"><di:waypoint x="1100" y="360" /><di:waypoint x="1128" y="360" /><di:waypoint x="1128" y="431" /><di:waypoint x="752" y="431" /><di:waypoint x="752" y="354" /><di:waypoint x="780" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_reapprovisionnement_pharmacie" bpmnElement="Flux_8_reapprovisionnement_pharmacie"><di:waypoint x="816" y="354" /><di:waypoint x="888" y="354" /><di:waypoint x="888" y="581" /><di:waypoint x="960" y="581" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_reapprovisionnement_pharmacie" bpmnElement="Flux_9_reapprovisionnement_pharmacie"><di:waypoint x="1122" y="624" /><di:waypoint x="1131" y="624" /><di:waypoint x="1131" y="360" /><di:waypoint x="1140" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="1116" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_reapprovisionnement_pharmacie" bpmnElement="Flux_10_reapprovisionnement_pharmacie"><di:waypoint x="1280" y="360" /><di:waypoint x="1390" y="360" /><di:waypoint x="1390" y="134" /><di:waypoint x="1500" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_reapprovisionnement_pharmacie" bpmnElement="Flux_11_reapprovisionnement_pharmacie"><di:waypoint x="1110" y="581" /><di:waypoint x="1215" y="581" /><di:waypoint x="1215" y="140" /><di:waypoint x="1320" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_reapprovisionnement_pharmacie" bpmnElement="Flux_12_reapprovisionnement_pharmacie"><di:waypoint x="1460" y="140" /><di:waypoint x="1480" y="140" /><di:waypoint x="1480" y="134" /><di:waypoint x="1500" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_bon_commande_reapprovisionnement_pharmacie" bpmnElement="Association_bon_commande_reapprovisionnement_pharmacie"><di:waypoint x="738" y="433" /><di:waypoint x="670" y="397" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_fiche_stock_reapprovisionnement_pharmacie" bpmnElement="Association_fiche_stock_reapprovisionnement_pharmacie"><di:waypoint x="1458" y="213" /><di:waypoint x="1390" y="177" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

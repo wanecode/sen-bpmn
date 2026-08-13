@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_hygiene_des_mains" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_hygiene_des_mains" name="Message métier" />
+  <bpmn:error id="Erreur_hygiene_des_mains" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_hygiene_des_mains" name="Hygiène des mains au point de soin" isExecutable="false">
+    <bpmn:documentation>Choisir et réaliser la technique d’hygiène des mains adaptée au moment du soin. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_hygiene_des_mains">
+      <bpmn:lane id="Couloir_1_hygiene_des_mains" name="Professionnel au point de soin">
+        <bpmn:flowNodeRef>debut_hygiene_des_mains</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>evaluer_hygiene_des_mains</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>souillees_hygiene_des_mains</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>lavage_hygiene_des_mains</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>friction_hygiene_des_mains</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>indispo_hygiene_des_mains</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>technique_hygiene_des_mains</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>sechage_hygiene_des_mains</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_hygiene_des_mains" name="Patient / environnement">
+        <bpmn:flowNodeRef>soin_hygiene_des_mains</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_hygiene_des_mains</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_hygiene_des_mains" name="Référent hygiène">
+        <bpmn:flowNodeRef>approvisionner_hygiene_des_mains</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>audit_hygiene_des_mains</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_hygiene_des_mains" name="Moment d’hygiène identifié">
+      <bpmn:outgoing>Flux_1_hygiene_des_mains</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="evaluer_hygiene_des_mains" name="Évaluer souillure et indication">
+      <bpmn:incoming>Flux_1_hygiene_des_mains</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_hygiene_des_mains</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="souillees_hygiene_des_mains" name="Mains visiblement souillées ?">
+      <bpmn:incoming>Flux_2_hygiene_des_mains</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_hygiene_des_mains</bpmn:outgoing>
+      <bpmn:outgoing>Flux_4_hygiene_des_mains</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:manualTask id="lavage_hygiene_des_mains" name="Laver à l’eau et au savon">
+      <bpmn:incoming>Flux_3_hygiene_des_mains</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_hygiene_des_mains</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="friction_hygiene_des_mains" name="Réaliser une friction hydroalcoolique">
+      <bpmn:incoming>Flux_4_hygiene_des_mains</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_hygiene_des_mains</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:boundaryEvent id="indispo_hygiene_des_mains" name="Produit indisponible" attachedToRef="friction_hygiene_des_mains" cancelActivity="true">
+      <bpmn:outgoing>Flux_5_hygiene_des_mains</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_indispo_hygiene_des_mains" errorRef="Erreur_hygiene_des_mains" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="approvisionner_hygiene_des_mains" name="Utiliser le point alternatif et signaler">
+      <bpmn:incoming>Flux_5_hygiene_des_mains</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_hygiene_des_mains</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="technique_hygiene_des_mains" name="Respecter durée et technique">
+      <bpmn:incoming>Flux_6_hygiene_des_mains</bpmn:incoming>
+      <bpmn:incoming>Flux_7_hygiene_des_mains</bpmn:incoming>
+      <bpmn:incoming>Flux_8_hygiene_des_mains</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_hygiene_des_mains</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_technique_hygiene_des_mains"><bpmn:outgoing>Flux_interne_1_technique_hygiene_des_mains</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_technique_hygiene_des_mains" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_technique_hygiene_des_mains</bpmn:incoming><bpmn:outgoing>Flux_interne_2_technique_hygiene_des_mains</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_technique_hygiene_des_mains"><bpmn:incoming>Flux_interne_2_technique_hygiene_des_mains</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_technique_hygiene_des_mains" sourceRef="Debut_interne_technique_hygiene_des_mains" targetRef="Etapes_internes_technique_hygiene_des_mains" />
+      <bpmn:sequenceFlow id="Flux_interne_2_technique_hygiene_des_mains" sourceRef="Etapes_internes_technique_hygiene_des_mains" targetRef="Fin_interne_technique_hygiene_des_mains" />
+    </bpmn:subProcess>
+    <bpmn:intermediateCatchEvent id="sechage_hygiene_des_mains" name="Temps de séchage complet">
+      <bpmn:incoming>Flux_9_hygiene_des_mains</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_hygiene_des_mains</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="Definition_temps_sechage_hygiene_des_mains" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="soin_hygiene_des_mains" name="Poursuivre le soin sans recontamination">
+      <bpmn:incoming>Flux_10_hygiene_des_mains</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_hygiene_des_mains</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="audit_hygiene_des_mains" name="Tracer l’observation si audit">
+      <bpmn:incoming>Flux_11_hygiene_des_mains</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_hygiene_des_mains</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="fin_hygiene_des_mains" name="Hygiène réalisée">
+      <bpmn:incoming>Flux_12_hygiene_des_mains</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_hygiene_des_mains" sourceRef="debut_hygiene_des_mains" targetRef="evaluer_hygiene_des_mains" />
+    <bpmn:sequenceFlow id="Flux_2_hygiene_des_mains" sourceRef="evaluer_hygiene_des_mains" targetRef="souillees_hygiene_des_mains" />
+    <bpmn:sequenceFlow id="Flux_3_hygiene_des_mains" name="Oui" sourceRef="souillees_hygiene_des_mains" targetRef="lavage_hygiene_des_mains" />
+    <bpmn:sequenceFlow id="Flux_4_hygiene_des_mains" name="Non" sourceRef="souillees_hygiene_des_mains" targetRef="friction_hygiene_des_mains" />
+    <bpmn:sequenceFlow id="Flux_5_hygiene_des_mains" name="Exception" sourceRef="indispo_hygiene_des_mains" targetRef="approvisionner_hygiene_des_mains" />
+    <bpmn:sequenceFlow id="Flux_6_hygiene_des_mains" sourceRef="approvisionner_hygiene_des_mains" targetRef="technique_hygiene_des_mains" />
+    <bpmn:sequenceFlow id="Flux_7_hygiene_des_mains" sourceRef="lavage_hygiene_des_mains" targetRef="technique_hygiene_des_mains" />
+    <bpmn:sequenceFlow id="Flux_8_hygiene_des_mains" sourceRef="friction_hygiene_des_mains" targetRef="technique_hygiene_des_mains" />
+    <bpmn:sequenceFlow id="Flux_9_hygiene_des_mains" sourceRef="technique_hygiene_des_mains" targetRef="sechage_hygiene_des_mains" />
+    <bpmn:sequenceFlow id="Flux_10_hygiene_des_mains" sourceRef="sechage_hygiene_des_mains" targetRef="soin_hygiene_des_mains" />
+    <bpmn:sequenceFlow id="Flux_11_hygiene_des_mains" sourceRef="soin_hygiene_des_mains" targetRef="audit_hygiene_des_mains" />
+    <bpmn:sequenceFlow id="Flux_12_hygiene_des_mains" sourceRef="audit_hygiene_des_mains" targetRef="fin_hygiene_des_mains" />
+    <bpmn:dataObject id="Objet_affiche_hygiene_des_mains" />
+    <bpmn:dataObjectReference id="Document_affiche_hygiene_des_mains" name="Aide-mémoire des 5 moments" dataObjectRef="Objet_affiche_hygiene_des_mains" />
+    <bpmn:association id="Association_affiche_hygiene_des_mains" sourceRef="Document_affiche_hygiene_des_mains" targetRef="evaluer_hygiene_des_mains" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_hygiene_des_mains">
+    <bpmndi:BPMNPlane id="Plan_hygiene_des_mains" bpmnElement="Processus_hygiene_des_mains">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_hygiene_des_mains" bpmnElement="Couloir_1_hygiene_des_mains" isHorizontal="true"><dc:Bounds x="20" y="30" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_hygiene_des_mains" bpmnElement="Couloir_2_hygiene_des_mains" isHorizontal="true"><dc:Bounds x="20" y="250" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_hygiene_des_mains" bpmnElement="Couloir_3_hygiene_des_mains" isHorizontal="true"><dc:Bounds x="20" y="470" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_hygiene_des_mains" bpmnElement="debut_hygiene_des_mains"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_evaluer_hygiene_des_mains" bpmnElement="evaluer_hygiene_des_mains"><dc:Bounds x="240" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_souillees_hygiene_des_mains" bpmnElement="souillees_hygiene_des_mains" isMarkerVisible="true"><dc:Bounds x="420" y="108" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_lavage_hygiene_des_mains" bpmnElement="lavage_hygiene_des_mains"><dc:Bounds x="600" y="55" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_friction_hygiene_des_mains" bpmnElement="friction_hygiene_des_mains"><dc:Bounds x="600" y="155" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_indispo_hygiene_des_mains" bpmnElement="indispo_hygiene_des_mains"><dc:Bounds x="722" y="214" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_approvisionner_hygiene_des_mains" bpmnElement="approvisionner_hygiene_des_mains"><dc:Bounds x="780" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_technique_hygiene_des_mains" bpmnElement="technique_hygiene_des_mains" isExpanded="false"><dc:Bounds x="960" y="98" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_sechage_hygiene_des_mains" bpmnElement="sechage_hygiene_des_mains"><dc:Bounds x="1140" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_soin_hygiene_des_mains" bpmnElement="soin_hygiene_des_mains"><dc:Bounds x="1320" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_audit_hygiene_des_mains" bpmnElement="audit_hygiene_des_mains"><dc:Bounds x="1500" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_hygiene_des_mains" bpmnElement="fin_hygiene_des_mains"><dc:Bounds x="1680" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_affiche_hygiene_des_mains" bpmnElement="Document_affiche_hygiene_des_mains"><dc:Bounds x="360" y="189" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_hygiene_des_mains" bpmnElement="Flux_1_hygiene_des_mains"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="140" /><di:waypoint x="240" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_hygiene_des_mains" bpmnElement="Flux_2_hygiene_des_mains"><di:waypoint x="380" y="140" /><di:waypoint x="400" y="140" /><di:waypoint x="400" y="133" /><di:waypoint x="420" y="133" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_hygiene_des_mains" bpmnElement="Flux_3_hygiene_des_mains"><di:waypoint x="470" y="133" /><di:waypoint x="535" y="133" /><di:waypoint x="535" y="92" /><di:waypoint x="600" y="92" /><bpmndi:BPMNLabel><dc:Bounds x="510" y="35" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_hygiene_des_mains" bpmnElement="Flux_4_hygiene_des_mains"><di:waypoint x="470" y="133" /><di:waypoint x="535" y="133" /><di:waypoint x="535" y="192" /><di:waypoint x="600" y="192" /><bpmndi:BPMNLabel><dc:Bounds x="510" y="88" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_hygiene_des_mains" bpmnElement="Flux_5_hygiene_des_mains"><di:waypoint x="752" y="229" /><di:waypoint x="766" y="229" /><di:waypoint x="766" y="580" /><di:waypoint x="780" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="751" y="194" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_hygiene_des_mains" bpmnElement="Flux_6_hygiene_des_mains"><di:waypoint x="920" y="580" /><di:waypoint x="940" y="580" /><di:waypoint x="940" y="141" /><di:waypoint x="960" y="141" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_hygiene_des_mains" bpmnElement="Flux_7_hygiene_des_mains"><di:waypoint x="740" y="92" /><di:waypoint x="850" y="92" /><di:waypoint x="850" y="141" /><di:waypoint x="960" y="141" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_hygiene_des_mains" bpmnElement="Flux_8_hygiene_des_mains"><di:waypoint x="740" y="192" /><di:waypoint x="850" y="192" /><di:waypoint x="850" y="141" /><di:waypoint x="960" y="141" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_hygiene_des_mains" bpmnElement="Flux_9_hygiene_des_mains"><di:waypoint x="1110" y="141" /><di:waypoint x="1125" y="141" /><di:waypoint x="1125" y="134" /><di:waypoint x="1140" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_hygiene_des_mains" bpmnElement="Flux_10_hygiene_des_mains"><di:waypoint x="1176" y="134" /><di:waypoint x="1248" y="134" /><di:waypoint x="1248" y="360" /><di:waypoint x="1320" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_hygiene_des_mains" bpmnElement="Flux_11_hygiene_des_mains"><di:waypoint x="1460" y="360" /><di:waypoint x="1480" y="360" /><di:waypoint x="1480" y="580" /><di:waypoint x="1500" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_hygiene_des_mains" bpmnElement="Flux_12_hygiene_des_mains"><di:waypoint x="1640" y="580" /><di:waypoint x="1660" y="580" /><di:waypoint x="1660" y="354" /><di:waypoint x="1680" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_affiche_hygiene_des_mains" bpmnElement="Association_affiche_hygiene_des_mains"><di:waypoint x="378" y="213" /><di:waypoint x="310" y="177" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

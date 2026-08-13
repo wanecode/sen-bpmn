@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_prise_en_charge_couverture_maladie" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_prise_en_charge_couverture_maladie" name="Message métier" />
+  <bpmn:error id="Erreur_prise_en_charge_couverture_maladie" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_prise_en_charge_couverture_maladie" name="Gestion de la couverture maladie" isExecutable="false">
+    <bpmn:documentation>Vérifier les droits et constituer le dossier de prise en charge selon la couverture présentée par le patient. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_prise_en_charge_couverture_maladie">
+      <bpmn:lane id="Couloir_1_prise_en_charge_couverture_maladie" name="Patient / accompagnant">
+        <bpmn:flowNodeRef>debut_prise_en_charge_couverture_maladie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_prise_en_charge_couverture_maladie</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_prise_en_charge_couverture_maladie" name="Admissions / caisse">
+        <bpmn:flowNodeRef>identifier_prise_en_charge_couverture_maladie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>verifier_prise_en_charge_couverture_maladie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>indisponible_prise_en_charge_couverture_maladie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>manuel_prise_en_charge_couverture_maladie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>accord_prise_en_charge_couverture_maladie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>enregistrer_prise_en_charge_couverture_maladie</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_prise_en_charge_couverture_maladie" name="Organisme payeur / service social">
+        <bpmn:flowNodeRef>demander_prise_en_charge_couverture_maladie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>reponse_prise_en_charge_couverture_maladie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>accepte_prise_en_charge_couverture_maladie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>social_prise_en_charge_couverture_maladie</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_prise_en_charge_couverture_maladie" name="Couverture présentée">
+      <bpmn:outgoing>Flux_1_prise_en_charge_couverture_maladie</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="identifier_prise_en_charge_couverture_maladie" name="Identifier le régime et les pièces">
+      <bpmn:incoming>Flux_1_prise_en_charge_couverture_maladie</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_prise_en_charge_couverture_maladie</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="verifier_prise_en_charge_couverture_maladie" name="Vérifier les droits">
+      <bpmn:incoming>Flux_2_prise_en_charge_couverture_maladie</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_prise_en_charge_couverture_maladie</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="indisponible_prise_en_charge_couverture_maladie" name="Service de vérification indisponible" attachedToRef="verifier_prise_en_charge_couverture_maladie" cancelActivity="true">
+      <bpmn:outgoing>Flux_4_prise_en_charge_couverture_maladie</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_indisponible_prise_en_charge_couverture_maladie" errorRef="Erreur_prise_en_charge_couverture_maladie" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="manuel_prise_en_charge_couverture_maladie" name="Appliquer le contrôle manuel">
+      <bpmn:incoming>Flux_4_prise_en_charge_couverture_maladie</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_prise_en_charge_couverture_maladie</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="accord_prise_en_charge_couverture_maladie" name="Accord requis ?">
+      <bpmn:incoming>Flux_3_prise_en_charge_couverture_maladie</bpmn:incoming>
+      <bpmn:incoming>Flux_5_prise_en_charge_couverture_maladie</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_prise_en_charge_couverture_maladie</bpmn:outgoing>
+      <bpmn:outgoing>Flux_7_prise_en_charge_couverture_maladie</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="demander_prise_en_charge_couverture_maladie" name="Constituer et transmettre la demande">
+      <bpmn:incoming>Flux_6_prise_en_charge_couverture_maladie</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_prise_en_charge_couverture_maladie</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_demander_prise_en_charge_couverture_maladie"><bpmn:outgoing>Flux_interne_1_demander_prise_en_charge_couverture_maladie</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_demander_prise_en_charge_couverture_maladie" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_demander_prise_en_charge_couverture_maladie</bpmn:incoming><bpmn:outgoing>Flux_interne_2_demander_prise_en_charge_couverture_maladie</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_demander_prise_en_charge_couverture_maladie"><bpmn:incoming>Flux_interne_2_demander_prise_en_charge_couverture_maladie</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_demander_prise_en_charge_couverture_maladie" sourceRef="Debut_interne_demander_prise_en_charge_couverture_maladie" targetRef="Etapes_internes_demander_prise_en_charge_couverture_maladie" />
+      <bpmn:sequenceFlow id="Flux_interne_2_demander_prise_en_charge_couverture_maladie" sourceRef="Etapes_internes_demander_prise_en_charge_couverture_maladie" targetRef="Fin_interne_demander_prise_en_charge_couverture_maladie" />
+    </bpmn:subProcess>
+    <bpmn:intermediateCatchEvent id="reponse_prise_en_charge_couverture_maladie" name="Réponse de prise en charge">
+      <bpmn:incoming>Flux_8_prise_en_charge_couverture_maladie</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_prise_en_charge_couverture_maladie</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_reponse_prise_en_charge_couverture_maladie" messageRef="Message_prise_en_charge_couverture_maladie" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="accepte_prise_en_charge_couverture_maladie" name="Accord obtenu ?">
+      <bpmn:incoming>Flux_9_prise_en_charge_couverture_maladie</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_prise_en_charge_couverture_maladie</bpmn:outgoing>
+      <bpmn:outgoing>Flux_11_prise_en_charge_couverture_maladie</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="enregistrer_prise_en_charge_couverture_maladie" name="Enregistrer la couverture">
+      <bpmn:incoming>Flux_7_prise_en_charge_couverture_maladie</bpmn:incoming>
+      <bpmn:incoming>Flux_10_prise_en_charge_couverture_maladie</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_prise_en_charge_couverture_maladie</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="social_prise_en_charge_couverture_maladie" name="Orienter vers caisse ou service social">
+      <bpmn:incoming>Flux_11_prise_en_charge_couverture_maladie</bpmn:incoming>
+      <bpmn:outgoing>Flux_13_prise_en_charge_couverture_maladie</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="fin_prise_en_charge_couverture_maladie" name="Modalités communiquées">
+      <bpmn:incoming>Flux_12_prise_en_charge_couverture_maladie</bpmn:incoming>
+      <bpmn:incoming>Flux_13_prise_en_charge_couverture_maladie</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_prise_en_charge_couverture_maladie" sourceRef="debut_prise_en_charge_couverture_maladie" targetRef="identifier_prise_en_charge_couverture_maladie" />
+    <bpmn:sequenceFlow id="Flux_2_prise_en_charge_couverture_maladie" sourceRef="identifier_prise_en_charge_couverture_maladie" targetRef="verifier_prise_en_charge_couverture_maladie" />
+    <bpmn:sequenceFlow id="Flux_3_prise_en_charge_couverture_maladie" sourceRef="verifier_prise_en_charge_couverture_maladie" targetRef="accord_prise_en_charge_couverture_maladie" />
+    <bpmn:sequenceFlow id="Flux_4_prise_en_charge_couverture_maladie" name="Exception" sourceRef="indisponible_prise_en_charge_couverture_maladie" targetRef="manuel_prise_en_charge_couverture_maladie" />
+    <bpmn:sequenceFlow id="Flux_5_prise_en_charge_couverture_maladie" sourceRef="manuel_prise_en_charge_couverture_maladie" targetRef="accord_prise_en_charge_couverture_maladie" />
+    <bpmn:sequenceFlow id="Flux_6_prise_en_charge_couverture_maladie" name="Oui" sourceRef="accord_prise_en_charge_couverture_maladie" targetRef="demander_prise_en_charge_couverture_maladie" />
+    <bpmn:sequenceFlow id="Flux_7_prise_en_charge_couverture_maladie" name="Non" sourceRef="accord_prise_en_charge_couverture_maladie" targetRef="enregistrer_prise_en_charge_couverture_maladie" />
+    <bpmn:sequenceFlow id="Flux_8_prise_en_charge_couverture_maladie" sourceRef="demander_prise_en_charge_couverture_maladie" targetRef="reponse_prise_en_charge_couverture_maladie" />
+    <bpmn:sequenceFlow id="Flux_9_prise_en_charge_couverture_maladie" sourceRef="reponse_prise_en_charge_couverture_maladie" targetRef="accepte_prise_en_charge_couverture_maladie" />
+    <bpmn:sequenceFlow id="Flux_10_prise_en_charge_couverture_maladie" name="Oui" sourceRef="accepte_prise_en_charge_couverture_maladie" targetRef="enregistrer_prise_en_charge_couverture_maladie" />
+    <bpmn:sequenceFlow id="Flux_11_prise_en_charge_couverture_maladie" name="Non" sourceRef="accepte_prise_en_charge_couverture_maladie" targetRef="social_prise_en_charge_couverture_maladie" />
+    <bpmn:sequenceFlow id="Flux_12_prise_en_charge_couverture_maladie" sourceRef="enregistrer_prise_en_charge_couverture_maladie" targetRef="fin_prise_en_charge_couverture_maladie" />
+    <bpmn:sequenceFlow id="Flux_13_prise_en_charge_couverture_maladie" sourceRef="social_prise_en_charge_couverture_maladie" targetRef="fin_prise_en_charge_couverture_maladie" />
+    <bpmn:dataObject id="Objet_attestation_prise_en_charge_couverture_maladie" />
+    <bpmn:dataObjectReference id="Document_attestation_prise_en_charge_couverture_maladie" name="Attestation de couverture" dataObjectRef="Objet_attestation_prise_en_charge_couverture_maladie" />
+    <bpmn:association id="Association_attestation_prise_en_charge_couverture_maladie" sourceRef="Document_attestation_prise_en_charge_couverture_maladie" targetRef="identifier_prise_en_charge_couverture_maladie" associationDirection="One" />
+    <bpmn:dataObject id="Objet_accord_doc_prise_en_charge_couverture_maladie" />
+    <bpmn:dataObjectReference id="Document_accord_doc_prise_en_charge_couverture_maladie" name="Accord de prise en charge" dataObjectRef="Objet_accord_doc_prise_en_charge_couverture_maladie" />
+    <bpmn:association id="Association_accord_doc_prise_en_charge_couverture_maladie" sourceRef="Document_accord_doc_prise_en_charge_couverture_maladie" targetRef="reponse_prise_en_charge_couverture_maladie" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_prise_en_charge_couverture_maladie">
+    <bpmndi:BPMNPlane id="Plan_prise_en_charge_couverture_maladie" bpmnElement="Processus_prise_en_charge_couverture_maladie">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_prise_en_charge_couverture_maladie" bpmnElement="Couloir_1_prise_en_charge_couverture_maladie" isHorizontal="true"><dc:Bounds x="20" y="30" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_prise_en_charge_couverture_maladie" bpmnElement="Couloir_2_prise_en_charge_couverture_maladie" isHorizontal="true"><dc:Bounds x="20" y="250" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_prise_en_charge_couverture_maladie" bpmnElement="Couloir_3_prise_en_charge_couverture_maladie" isHorizontal="true"><dc:Bounds x="20" y="470" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_prise_en_charge_couverture_maladie" bpmnElement="debut_prise_en_charge_couverture_maladie"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_identifier_prise_en_charge_couverture_maladie" bpmnElement="identifier_prise_en_charge_couverture_maladie"><dc:Bounds x="240" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_verifier_prise_en_charge_couverture_maladie" bpmnElement="verifier_prise_en_charge_couverture_maladie"><dc:Bounds x="420" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_indisponible_prise_en_charge_couverture_maladie" bpmnElement="indisponible_prise_en_charge_couverture_maladie"><dc:Bounds x="542" y="382" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_manuel_prise_en_charge_couverture_maladie" bpmnElement="manuel_prise_en_charge_couverture_maladie"><dc:Bounds x="600" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_accord_prise_en_charge_couverture_maladie" bpmnElement="accord_prise_en_charge_couverture_maladie" isMarkerVisible="true"><dc:Bounds x="780" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_demander_prise_en_charge_couverture_maladie" bpmnElement="demander_prise_en_charge_couverture_maladie" isExpanded="false"><dc:Bounds x="960" y="538" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_reponse_prise_en_charge_couverture_maladie" bpmnElement="reponse_prise_en_charge_couverture_maladie"><dc:Bounds x="1140" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_accepte_prise_en_charge_couverture_maladie" bpmnElement="accepte_prise_en_charge_couverture_maladie" isMarkerVisible="true"><dc:Bounds x="1320" y="548" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_enregistrer_prise_en_charge_couverture_maladie" bpmnElement="enregistrer_prise_en_charge_couverture_maladie"><dc:Bounds x="1500" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_social_prise_en_charge_couverture_maladie" bpmnElement="social_prise_en_charge_couverture_maladie"><dc:Bounds x="1500" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_prise_en_charge_couverture_maladie" bpmnElement="fin_prise_en_charge_couverture_maladie"><dc:Bounds x="1680" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_attestation_prise_en_charge_couverture_maladie" bpmnElement="Document_attestation_prise_en_charge_couverture_maladie"><dc:Bounds x="360" y="409" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_accord_doc_prise_en_charge_couverture_maladie" bpmnElement="Document_accord_doc_prise_en_charge_couverture_maladie"><dc:Bounds x="1156" y="604" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_prise_en_charge_couverture_maladie" bpmnElement="Flux_1_prise_en_charge_couverture_maladie"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="360" /><di:waypoint x="240" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_prise_en_charge_couverture_maladie" bpmnElement="Flux_2_prise_en_charge_couverture_maladie"><di:waypoint x="380" y="360" /><di:waypoint x="420" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_prise_en_charge_couverture_maladie" bpmnElement="Flux_3_prise_en_charge_couverture_maladie"><di:waypoint x="560" y="360" /><di:waypoint x="670" y="360" /><di:waypoint x="670" y="353" /><di:waypoint x="780" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_prise_en_charge_couverture_maladie" bpmnElement="Flux_4_prise_en_charge_couverture_maladie"><di:waypoint x="572" y="397" /><di:waypoint x="586" y="397" /><di:waypoint x="586" y="360" /><di:waypoint x="600" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="571" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_prise_en_charge_couverture_maladie" bpmnElement="Flux_5_prise_en_charge_couverture_maladie"><di:waypoint x="740" y="360" /><di:waypoint x="760" y="360" /><di:waypoint x="760" y="353" /><di:waypoint x="780" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_prise_en_charge_couverture_maladie" bpmnElement="Flux_6_prise_en_charge_couverture_maladie"><di:waypoint x="830" y="353" /><di:waypoint x="895" y="353" /><di:waypoint x="895" y="581" /><di:waypoint x="960" y="581" /><bpmndi:BPMNLabel><dc:Bounds x="870" y="308" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_prise_en_charge_couverture_maladie" bpmnElement="Flux_7_prise_en_charge_couverture_maladie"><di:waypoint x="830" y="353" /><di:waypoint x="1165" y="353" /><di:waypoint x="1165" y="360" /><di:waypoint x="1500" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="1140" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_prise_en_charge_couverture_maladie" bpmnElement="Flux_8_prise_en_charge_couverture_maladie"><di:waypoint x="1110" y="581" /><di:waypoint x="1125" y="581" /><di:waypoint x="1125" y="574" /><di:waypoint x="1140" y="574" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_prise_en_charge_couverture_maladie" bpmnElement="Flux_9_prise_en_charge_couverture_maladie"><di:waypoint x="1176" y="574" /><di:waypoint x="1320" y="573" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_prise_en_charge_couverture_maladie" bpmnElement="Flux_10_prise_en_charge_couverture_maladie"><di:waypoint x="1370" y="573" /><di:waypoint x="1435" y="573" /><di:waypoint x="1435" y="360" /><di:waypoint x="1500" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="1410" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_prise_en_charge_couverture_maladie" bpmnElement="Flux_11_prise_en_charge_couverture_maladie"><di:waypoint x="1370" y="573" /><di:waypoint x="1435" y="573" /><di:waypoint x="1435" y="580" /><di:waypoint x="1500" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="1410" y="523" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_prise_en_charge_couverture_maladie" bpmnElement="Flux_12_prise_en_charge_couverture_maladie"><di:waypoint x="1640" y="360" /><di:waypoint x="1660" y="360" /><di:waypoint x="1660" y="134" /><di:waypoint x="1680" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_13_prise_en_charge_couverture_maladie" bpmnElement="Flux_13_prise_en_charge_couverture_maladie"><di:waypoint x="1640" y="580" /><di:waypoint x="1660" y="580" /><di:waypoint x="1660" y="134" /><di:waypoint x="1680" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_attestation_prise_en_charge_couverture_maladie" bpmnElement="Association_attestation_prise_en_charge_couverture_maladie"><di:waypoint x="378" y="433" /><di:waypoint x="310" y="397" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_accord_doc_prise_en_charge_couverture_maladie" bpmnElement="Association_accord_doc_prise_en_charge_couverture_maladie"><di:waypoint x="1174" y="628" /><di:waypoint x="1158" y="592" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

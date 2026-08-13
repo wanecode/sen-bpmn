@@ -1,0 +1,40 @@
+name: Signaler un problème technique
+description: Interface, chargement BPMN, recherche, téléchargement ou déploiement.
+title: "[Bug] "
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: Merci de ne jamais joindre de donnée de patient ou d’information confidentielle.
+  - type: textarea
+    id: description
+    attributes:
+      label: Problème observé
+      description: Décrivez le résultat obtenu et le résultat attendu.
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Page ou processus concerné
+      placeholder: /processus/accueil-triage-urgences
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes de reproduction
+      placeholder: |
+        1. Ouvrir…
+        2. Cliquer…
+        3. Observer…
+    validations:
+      required: true
+  - type: dropdown
+    id: device
+    attributes:
+      label: Environnement
+      options: [Ordinateur, Téléphone, Tablette, Serveur / Docker, Autre]
+  - type: textarea
+    id: context
+    attributes:
+      label: Informations complémentaires
+      description: Navigateur, version du conteneur, capture anonymisée ou journaux utiles.

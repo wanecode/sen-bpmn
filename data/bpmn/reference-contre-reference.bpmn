@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_reference_contre_reference" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_reference_contre_reference" name="Message métier" />
+  <bpmn:error id="Erreur_reference_contre_reference" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_reference_contre_reference" name="Référence et contre-référence du patient" isExecutable="false">
+    <bpmn:documentation>Assurer une orientation documentée entre structures de santé et le retour d’information au professionnel référent. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_reference_contre_reference">
+      <bpmn:lane id="Couloir_1_reference_contre_reference" name="Structure référente">
+        <bpmn:flowNodeRef>debut_reference_contre_reference</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>stabiliser_reference_contre_reference</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>dossier_reference_contre_reference</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>contre_ref_reference_contre_reference</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_reference_contre_reference</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_reference_contre_reference" name="Coordination / transport">
+        <bpmn:flowNodeRef>contacter_reference_contre_reference</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>reponse_reference_contre_reference</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>refus_reference_contre_reference</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>alternative_reference_contre_reference</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>accepte_reference_contre_reference</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>transport_reference_contre_reference</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_reference_contre_reference" name="Structure receveuse">
+        <bpmn:flowNodeRef>recevoir_reference_contre_reference</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_reference_contre_reference" name="Besoin de référence identifié">
+      <bpmn:outgoing>Flux_1_reference_contre_reference</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="stabiliser_reference_contre_reference" name="Stabiliser avant transfert">
+      <bpmn:incoming>Flux_1_reference_contre_reference</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_reference_contre_reference</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_stabiliser_reference_contre_reference"><bpmn:outgoing>Flux_interne_1_stabiliser_reference_contre_reference</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_stabiliser_reference_contre_reference" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_stabiliser_reference_contre_reference</bpmn:incoming><bpmn:outgoing>Flux_interne_2_stabiliser_reference_contre_reference</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_stabiliser_reference_contre_reference"><bpmn:incoming>Flux_interne_2_stabiliser_reference_contre_reference</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_stabiliser_reference_contre_reference" sourceRef="Debut_interne_stabiliser_reference_contre_reference" targetRef="Etapes_internes_stabiliser_reference_contre_reference" />
+      <bpmn:sequenceFlow id="Flux_interne_2_stabiliser_reference_contre_reference" sourceRef="Etapes_internes_stabiliser_reference_contre_reference" targetRef="Fin_interne_stabiliser_reference_contre_reference" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="dossier_reference_contre_reference" name="Constituer le dossier de référence">
+      <bpmn:incoming>Flux_2_reference_contre_reference</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_reference_contre_reference</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="contacter_reference_contre_reference" name="Contacter la structure receveuse">
+      <bpmn:incoming>Flux_3_reference_contre_reference</bpmn:incoming>
+      <bpmn:outgoing>Flux_4_reference_contre_reference</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="reponse_reference_contre_reference" name="Réponse reçue">
+      <bpmn:incoming>Flux_4_reference_contre_reference</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_reference_contre_reference</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_reponse_reference_contre_reference" messageRef="Message_reference_contre_reference" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:boundaryEvent id="refus_reference_contre_reference" name="Absence de réponse" attachedToRef="contacter_reference_contre_reference" cancelActivity="true">
+      <bpmn:outgoing>Flux_6_reference_contre_reference</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="Definition_temps_refus_reference_contre_reference" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="alternative_reference_contre_reference" name="Chercher une structure alternative">
+      <bpmn:incoming>Flux_6_reference_contre_reference</bpmn:incoming>
+      <bpmn:incoming>Flux_9_reference_contre_reference</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_reference_contre_reference</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="accepte_reference_contre_reference" name="Transfert accepté ?">
+      <bpmn:incoming>Flux_5_reference_contre_reference</bpmn:incoming>
+      <bpmn:incoming>Flux_7_reference_contre_reference</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_reference_contre_reference</bpmn:outgoing>
+      <bpmn:outgoing>Flux_9_reference_contre_reference</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="transport_reference_contre_reference" name="Organiser le transport sécurisé">
+      <bpmn:incoming>Flux_8_reference_contre_reference</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_reference_contre_reference</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_transport_reference_contre_reference"><bpmn:outgoing>Flux_interne_1_transport_reference_contre_reference</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_transport_reference_contre_reference" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_transport_reference_contre_reference</bpmn:incoming><bpmn:outgoing>Flux_interne_2_transport_reference_contre_reference</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_transport_reference_contre_reference"><bpmn:incoming>Flux_interne_2_transport_reference_contre_reference</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_transport_reference_contre_reference" sourceRef="Debut_interne_transport_reference_contre_reference" targetRef="Etapes_internes_transport_reference_contre_reference" />
+      <bpmn:sequenceFlow id="Flux_interne_2_transport_reference_contre_reference" sourceRef="Etapes_internes_transport_reference_contre_reference" targetRef="Fin_interne_transport_reference_contre_reference" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="recevoir_reference_contre_reference" name="Accueillir et prendre en charge">
+      <bpmn:incoming>Flux_10_reference_contre_reference</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_reference_contre_reference</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="contre_ref_reference_contre_reference" name="Contre-référence transmise">
+      <bpmn:incoming>Flux_11_reference_contre_reference</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_reference_contre_reference</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_contre_ref_reference_contre_reference" messageRef="Message_reference_contre_reference" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="fin_reference_contre_reference" name="Boucle de référence close">
+      <bpmn:incoming>Flux_12_reference_contre_reference</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_reference_contre_reference" sourceRef="debut_reference_contre_reference" targetRef="stabiliser_reference_contre_reference" />
+    <bpmn:sequenceFlow id="Flux_2_reference_contre_reference" sourceRef="stabiliser_reference_contre_reference" targetRef="dossier_reference_contre_reference" />
+    <bpmn:sequenceFlow id="Flux_3_reference_contre_reference" sourceRef="dossier_reference_contre_reference" targetRef="contacter_reference_contre_reference" />
+    <bpmn:sequenceFlow id="Flux_4_reference_contre_reference" sourceRef="contacter_reference_contre_reference" targetRef="reponse_reference_contre_reference" />
+    <bpmn:sequenceFlow id="Flux_5_reference_contre_reference" sourceRef="reponse_reference_contre_reference" targetRef="accepte_reference_contre_reference" />
+    <bpmn:sequenceFlow id="Flux_6_reference_contre_reference" name="Exception" sourceRef="refus_reference_contre_reference" targetRef="alternative_reference_contre_reference" />
+    <bpmn:sequenceFlow id="Flux_7_reference_contre_reference" sourceRef="alternative_reference_contre_reference" targetRef="accepte_reference_contre_reference" />
+    <bpmn:sequenceFlow id="Flux_8_reference_contre_reference" name="Oui" sourceRef="accepte_reference_contre_reference" targetRef="transport_reference_contre_reference" />
+    <bpmn:sequenceFlow id="Flux_9_reference_contre_reference" name="Non" sourceRef="accepte_reference_contre_reference" targetRef="alternative_reference_contre_reference" />
+    <bpmn:sequenceFlow id="Flux_10_reference_contre_reference" sourceRef="transport_reference_contre_reference" targetRef="recevoir_reference_contre_reference" />
+    <bpmn:sequenceFlow id="Flux_11_reference_contre_reference" sourceRef="recevoir_reference_contre_reference" targetRef="contre_ref_reference_contre_reference" />
+    <bpmn:sequenceFlow id="Flux_12_reference_contre_reference" sourceRef="contre_ref_reference_contre_reference" targetRef="fin_reference_contre_reference" />
+    <bpmn:dataObject id="Objet_fiche_ref_reference_contre_reference" />
+    <bpmn:dataObjectReference id="Document_fiche_ref_reference_contre_reference" name="Fiche de référence" dataObjectRef="Objet_fiche_ref_reference_contre_reference" />
+    <bpmn:association id="Association_fiche_ref_reference_contre_reference" sourceRef="Document_fiche_ref_reference_contre_reference" targetRef="dossier_reference_contre_reference" associationDirection="One" />
+    <bpmn:dataObject id="Objet_fiche_contre_reference_contre_reference" />
+    <bpmn:dataObjectReference id="Document_fiche_contre_reference_contre_reference" name="Fiche de contre-référence" dataObjectRef="Objet_fiche_contre_reference_contre_reference" />
+    <bpmn:association id="Association_fiche_contre_reference_contre_reference" sourceRef="Document_fiche_contre_reference_contre_reference" targetRef="contre_ref_reference_contre_reference" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_reference_contre_reference">
+    <bpmndi:BPMNPlane id="Plan_reference_contre_reference" bpmnElement="Processus_reference_contre_reference">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_reference_contre_reference" bpmnElement="Couloir_1_reference_contre_reference" isHorizontal="true"><dc:Bounds x="20" y="30" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_reference_contre_reference" bpmnElement="Couloir_2_reference_contre_reference" isHorizontal="true"><dc:Bounds x="20" y="250" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_reference_contre_reference" bpmnElement="Couloir_3_reference_contre_reference" isHorizontal="true"><dc:Bounds x="20" y="470" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_reference_contre_reference" bpmnElement="debut_reference_contre_reference"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_stabiliser_reference_contre_reference" bpmnElement="stabiliser_reference_contre_reference" isExpanded="false"><dc:Bounds x="240" y="98" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_dossier_reference_contre_reference" bpmnElement="dossier_reference_contre_reference"><dc:Bounds x="420" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_contacter_reference_contre_reference" bpmnElement="contacter_reference_contre_reference"><dc:Bounds x="600" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_reponse_reference_contre_reference" bpmnElement="reponse_reference_contre_reference"><dc:Bounds x="780" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_refus_reference_contre_reference" bpmnElement="refus_reference_contre_reference"><dc:Bounds x="722" y="382" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_alternative_reference_contre_reference" bpmnElement="alternative_reference_contre_reference"><dc:Bounds x="960" y="275" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_accepte_reference_contre_reference" bpmnElement="accepte_reference_contre_reference" isMarkerVisible="true"><dc:Bounds x="960" y="380" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_transport_reference_contre_reference" bpmnElement="transport_reference_contre_reference" isExpanded="false"><dc:Bounds x="1140" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_recevoir_reference_contre_reference" bpmnElement="recevoir_reference_contre_reference"><dc:Bounds x="1320" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_contre_ref_reference_contre_reference" bpmnElement="contre_ref_reference_contre_reference"><dc:Bounds x="1500" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_reference_contre_reference" bpmnElement="fin_reference_contre_reference"><dc:Bounds x="1680" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_fiche_ref_reference_contre_reference" bpmnElement="Document_fiche_ref_reference_contre_reference"><dc:Bounds x="540" y="189" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_fiche_contre_reference_contre_reference" bpmnElement="Document_fiche_contre_reference_contre_reference"><dc:Bounds x="1516" y="164" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_reference_contre_reference" bpmnElement="Flux_1_reference_contre_reference"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="141" /><di:waypoint x="240" y="141" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_reference_contre_reference" bpmnElement="Flux_2_reference_contre_reference"><di:waypoint x="390" y="141" /><di:waypoint x="420" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_reference_contre_reference" bpmnElement="Flux_3_reference_contre_reference"><di:waypoint x="560" y="140" /><di:waypoint x="580" y="140" /><di:waypoint x="580" y="360" /><di:waypoint x="600" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_reference_contre_reference" bpmnElement="Flux_4_reference_contre_reference"><di:waypoint x="740" y="360" /><di:waypoint x="760" y="360" /><di:waypoint x="760" y="354" /><di:waypoint x="780" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_reference_contre_reference" bpmnElement="Flux_5_reference_contre_reference"><di:waypoint x="816" y="354" /><di:waypoint x="888" y="354" /><di:waypoint x="888" y="405" /><di:waypoint x="960" y="405" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_reference_contre_reference" bpmnElement="Flux_6_reference_contre_reference"><di:waypoint x="752" y="397" /><di:waypoint x="856" y="397" /><di:waypoint x="856" y="312" /><di:waypoint x="960" y="312" /><bpmndi:BPMNLabel><dc:Bounds x="841" y="255" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_reference_contre_reference" bpmnElement="Flux_7_reference_contre_reference"><di:waypoint x="1100" y="312" /><di:waypoint x="1128" y="312" /><di:waypoint x="1128" y="464" /><di:waypoint x="932" y="464" /><di:waypoint x="932" y="405" /><di:waypoint x="960" y="405" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_reference_contre_reference" bpmnElement="Flux_8_reference_contre_reference"><di:waypoint x="1010" y="405" /><di:waypoint x="1075" y="405" /><di:waypoint x="1075" y="361" /><di:waypoint x="1140" y="361" /><bpmndi:BPMNLabel><dc:Bounds x="1050" y="298" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_reference_contre_reference" bpmnElement="Flux_9_reference_contre_reference"><di:waypoint x="1010" y="405" /><di:waypoint x="1038" y="405" /><di:waypoint x="1038" y="464" /><di:waypoint x="932" y="464" /><di:waypoint x="932" y="312" /><di:waypoint x="960" y="312" /><bpmndi:BPMNLabel><dc:Bounds x="960" y="255" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_reference_contre_reference" bpmnElement="Flux_10_reference_contre_reference"><di:waypoint x="1290" y="361" /><di:waypoint x="1305" y="361" /><di:waypoint x="1305" y="580" /><di:waypoint x="1320" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_reference_contre_reference" bpmnElement="Flux_11_reference_contre_reference"><di:waypoint x="1460" y="580" /><di:waypoint x="1480" y="580" /><di:waypoint x="1480" y="134" /><di:waypoint x="1500" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_reference_contre_reference" bpmnElement="Flux_12_reference_contre_reference"><di:waypoint x="1536" y="134" /><di:waypoint x="1680" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_fiche_ref_reference_contre_reference" bpmnElement="Association_fiche_ref_reference_contre_reference"><di:waypoint x="558" y="213" /><di:waypoint x="490" y="177" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_fiche_contre_reference_contre_reference" bpmnElement="Association_fiche_contre_reference_contre_reference"><di:waypoint x="1534" y="188" /><di:waypoint x="1518" y="152" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

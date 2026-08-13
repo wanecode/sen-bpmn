@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_identification_patient" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_identification_patient" name="Message métier" />
+  <bpmn:error id="Erreur_identification_patient" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_identification_patient" name="Identification du patient" isExecutable="false">
+    <bpmn:documentation>Créer ou retrouver une identité fiable et prévenir les doublons avant toute prise en charge. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_identification_patient">
+      <bpmn:lane id="Couloir_1_identification_patient" name="Patient / accompagnant">
+        <bpmn:flowNodeRef>debut_identification_patient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>verification_identification_patient</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_identification_patient" name="Agent d’accueil">
+        <bpmn:flowNodeRef>recueillir_identification_patient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>rechercher_identification_patient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>correspondance_identification_patient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>selectionner_identification_patient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>creer_identification_patient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>doublon_identification_patient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>bracelet_identification_patient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_identification_patient</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_identification_patient" name="Référent identitovigilance">
+        <bpmn:flowNodeRef>arbitrer_identification_patient</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_identification_patient" name="Premier contact">
+      <bpmn:outgoing>Flux_1_identification_patient</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="recueillir_identification_patient" name="Recueillir les traits d’identité">
+      <bpmn:incoming>Flux_1_identification_patient</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_identification_patient</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="rechercher_identification_patient" name="Rechercher dans l’index patient">
+      <bpmn:incoming>Flux_2_identification_patient</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_identification_patient</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="correspondance_identification_patient" name="Correspondance certaine ?">
+      <bpmn:incoming>Flux_3_identification_patient</bpmn:incoming>
+      <bpmn:outgoing>Flux_4_identification_patient</bpmn:outgoing>
+      <bpmn:outgoing>Flux_5_identification_patient</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="selectionner_identification_patient" name="Sélectionner le dossier existant">
+      <bpmn:incoming>Flux_4_identification_patient</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_identification_patient</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="creer_identification_patient" name="Créer et qualifier une identité">
+      <bpmn:incoming>Flux_5_identification_patient</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_identification_patient</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_creer_identification_patient"><bpmn:outgoing>Flux_interne_1_creer_identification_patient</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_creer_identification_patient" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_creer_identification_patient</bpmn:incoming><bpmn:outgoing>Flux_interne_2_creer_identification_patient</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_creer_identification_patient"><bpmn:incoming>Flux_interne_2_creer_identification_patient</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_creer_identification_patient" sourceRef="Debut_interne_creer_identification_patient" targetRef="Etapes_internes_creer_identification_patient" />
+      <bpmn:sequenceFlow id="Flux_interne_2_creer_identification_patient" sourceRef="Etapes_internes_creer_identification_patient" targetRef="Fin_interne_creer_identification_patient" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="doublon_identification_patient" name="Suspicion de doublon" attachedToRef="creer_identification_patient" cancelActivity="true">
+      <bpmn:outgoing>Flux_6_identification_patient</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_doublon_identification_patient" errorRef="Erreur_identification_patient" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="arbitrer_identification_patient" name="Arbitrer le rapprochement d’identité">
+      <bpmn:incoming>Flux_6_identification_patient</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_identification_patient</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:manualTask id="bracelet_identification_patient" name="Poser ou vérifier l’identifiant">
+      <bpmn:incoming>Flux_7_identification_patient</bpmn:incoming>
+      <bpmn:incoming>Flux_8_identification_patient</bpmn:incoming>
+      <bpmn:incoming>Flux_9_identification_patient</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_identification_patient</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:intermediateCatchEvent id="verification_identification_patient" name="Identité confirmée avec le patient">
+      <bpmn:incoming>Flux_10_identification_patient</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_identification_patient</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_verification_identification_patient" messageRef="Message_identification_patient" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="fin_identification_patient" name="Identité sécurisée">
+      <bpmn:incoming>Flux_11_identification_patient</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_identification_patient" sourceRef="debut_identification_patient" targetRef="recueillir_identification_patient" />
+    <bpmn:sequenceFlow id="Flux_2_identification_patient" sourceRef="recueillir_identification_patient" targetRef="rechercher_identification_patient" />
+    <bpmn:sequenceFlow id="Flux_3_identification_patient" sourceRef="rechercher_identification_patient" targetRef="correspondance_identification_patient" />
+    <bpmn:sequenceFlow id="Flux_4_identification_patient" name="Oui" sourceRef="correspondance_identification_patient" targetRef="selectionner_identification_patient" />
+    <bpmn:sequenceFlow id="Flux_5_identification_patient" name="Non" sourceRef="correspondance_identification_patient" targetRef="creer_identification_patient" />
+    <bpmn:sequenceFlow id="Flux_6_identification_patient" name="Exception" sourceRef="doublon_identification_patient" targetRef="arbitrer_identification_patient" />
+    <bpmn:sequenceFlow id="Flux_7_identification_patient" sourceRef="arbitrer_identification_patient" targetRef="bracelet_identification_patient" />
+    <bpmn:sequenceFlow id="Flux_8_identification_patient" sourceRef="selectionner_identification_patient" targetRef="bracelet_identification_patient" />
+    <bpmn:sequenceFlow id="Flux_9_identification_patient" sourceRef="creer_identification_patient" targetRef="bracelet_identification_patient" />
+    <bpmn:sequenceFlow id="Flux_10_identification_patient" sourceRef="bracelet_identification_patient" targetRef="verification_identification_patient" />
+    <bpmn:sequenceFlow id="Flux_11_identification_patient" sourceRef="verification_identification_patient" targetRef="fin_identification_patient" />
+    <bpmn:dataObject id="Objet_fiche_identite_identification_patient" />
+    <bpmn:dataObjectReference id="Document_fiche_identite_identification_patient" name="Fiche d’identification patient" dataObjectRef="Objet_fiche_identite_identification_patient" />
+    <bpmn:association id="Association_fiche_identite_identification_patient" sourceRef="Document_fiche_identite_identification_patient" targetRef="recueillir_identification_patient" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_identification_patient">
+    <bpmndi:BPMNPlane id="Plan_identification_patient" bpmnElement="Processus_identification_patient">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_identification_patient" bpmnElement="Couloir_1_identification_patient" isHorizontal="true"><dc:Bounds x="20" y="30" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_identification_patient" bpmnElement="Couloir_2_identification_patient" isHorizontal="true"><dc:Bounds x="20" y="250" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_identification_patient" bpmnElement="Couloir_3_identification_patient" isHorizontal="true"><dc:Bounds x="20" y="470" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_identification_patient" bpmnElement="debut_identification_patient"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_recueillir_identification_patient" bpmnElement="recueillir_identification_patient"><dc:Bounds x="240" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_rechercher_identification_patient" bpmnElement="rechercher_identification_patient"><dc:Bounds x="420" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_correspondance_identification_patient" bpmnElement="correspondance_identification_patient" isMarkerVisible="true"><dc:Bounds x="600" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_selectionner_identification_patient" bpmnElement="selectionner_identification_patient"><dc:Bounds x="780" y="275" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_creer_identification_patient" bpmnElement="creer_identification_patient" isExpanded="false"><dc:Bounds x="780" y="370" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_doublon_identification_patient" bpmnElement="doublon_identification_patient"><dc:Bounds x="912" y="441" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_arbitrer_identification_patient" bpmnElement="arbitrer_identification_patient"><dc:Bounds x="960" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_bracelet_identification_patient" bpmnElement="bracelet_identification_patient"><dc:Bounds x="1140" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_verification_identification_patient" bpmnElement="verification_identification_patient"><dc:Bounds x="1320" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_identification_patient" bpmnElement="fin_identification_patient"><dc:Bounds x="1500" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_fiche_identite_identification_patient" bpmnElement="Document_fiche_identite_identification_patient"><dc:Bounds x="360" y="409" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_identification_patient" bpmnElement="Flux_1_identification_patient"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="360" /><di:waypoint x="240" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_identification_patient" bpmnElement="Flux_2_identification_patient"><di:waypoint x="380" y="360" /><di:waypoint x="420" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_identification_patient" bpmnElement="Flux_3_identification_patient"><di:waypoint x="560" y="360" /><di:waypoint x="580" y="360" /><di:waypoint x="580" y="353" /><di:waypoint x="600" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_identification_patient" bpmnElement="Flux_4_identification_patient"><di:waypoint x="650" y="353" /><di:waypoint x="715" y="353" /><di:waypoint x="715" y="312" /><di:waypoint x="780" y="312" /><bpmndi:BPMNLabel><dc:Bounds x="690" y="255" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_identification_patient" bpmnElement="Flux_5_identification_patient"><di:waypoint x="650" y="353" /><di:waypoint x="715" y="353" /><di:waypoint x="715" y="413" /><di:waypoint x="780" y="413" /><bpmndi:BPMNLabel><dc:Bounds x="690" y="308" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_identification_patient" bpmnElement="Flux_6_identification_patient"><di:waypoint x="942" y="456" /><di:waypoint x="951" y="456" /><di:waypoint x="951" y="580" /><di:waypoint x="960" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="936" y="421" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_identification_patient" bpmnElement="Flux_7_identification_patient"><di:waypoint x="1100" y="580" /><di:waypoint x="1120" y="580" /><di:waypoint x="1120" y="360" /><di:waypoint x="1140" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_identification_patient" bpmnElement="Flux_8_identification_patient"><di:waypoint x="920" y="312" /><di:waypoint x="1030" y="312" /><di:waypoint x="1030" y="360" /><di:waypoint x="1140" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_identification_patient" bpmnElement="Flux_9_identification_patient"><di:waypoint x="930" y="413" /><di:waypoint x="1035" y="413" /><di:waypoint x="1035" y="360" /><di:waypoint x="1140" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_identification_patient" bpmnElement="Flux_10_identification_patient"><di:waypoint x="1280" y="360" /><di:waypoint x="1300" y="360" /><di:waypoint x="1300" y="134" /><di:waypoint x="1320" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_identification_patient" bpmnElement="Flux_11_identification_patient"><di:waypoint x="1356" y="134" /><di:waypoint x="1428" y="134" /><di:waypoint x="1428" y="354" /><di:waypoint x="1500" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_fiche_identite_identification_patient" bpmnElement="Association_fiche_identite_identification_patient"><di:waypoint x="378" y="433" /><di:waypoint x="310" y="397" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_parcours_patient_hospitalise" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_parcours_patient_hospitalise" name="Message métier" />
+  <bpmn:error id="Erreur_parcours_patient_hospitalise" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_parcours_patient_hospitalise" name="Parcours du patient hospitalisé" isExecutable="false">
+    <bpmn:documentation>Coordonner l’évaluation initiale, le projet de soins, les réévaluations et la préparation de la sortie. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_parcours_patient_hospitalise">
+      <bpmn:lane id="Couloir_1_parcours_patient_hospitalise" name="Équipe médicale">
+        <bpmn:flowNodeRef>evaluation_parcours_patient_hospitalise</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>objectifs_parcours_patient_hospitalise</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>adapter_parcours_patient_hospitalise</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_parcours_patient_hospitalise" name="Équipe soignante">
+        <bpmn:flowNodeRef>debut_parcours_patient_hospitalise</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>prescriptions_parcours_patient_hospitalise</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>incident_parcours_patient_hospitalise</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>securiser_parcours_patient_hospitalise</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_parcours_patient_hospitalise" name="Équipe pluridisciplinaire">
+        <bpmn:flowNodeRef>projet_parcours_patient_hospitalise</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_parcours_patient_hospitalise</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>education_parcours_patient_hospitalise</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>merge_parcours_patient_hospitalise</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>revue_parcours_patient_hospitalise</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>sortie_parcours_patient_hospitalise</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_parcours_patient_hospitalise</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_parcours_patient_hospitalise" name="Patient accueilli dans l’unité">
+      <bpmn:outgoing>Flux_1_parcours_patient_hospitalise</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="evaluation_parcours_patient_hospitalise" name="Réaliser l’évaluation initiale">
+      <bpmn:incoming>Flux_1_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_parcours_patient_hospitalise</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_evaluation_parcours_patient_hospitalise"><bpmn:outgoing>Flux_interne_1_evaluation_parcours_patient_hospitalise</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_evaluation_parcours_patient_hospitalise" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_evaluation_parcours_patient_hospitalise</bpmn:incoming><bpmn:outgoing>Flux_interne_2_evaluation_parcours_patient_hospitalise</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_evaluation_parcours_patient_hospitalise"><bpmn:incoming>Flux_interne_2_evaluation_parcours_patient_hospitalise</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_evaluation_parcours_patient_hospitalise" sourceRef="Debut_interne_evaluation_parcours_patient_hospitalise" targetRef="Etapes_internes_evaluation_parcours_patient_hospitalise" />
+      <bpmn:sequenceFlow id="Flux_interne_2_evaluation_parcours_patient_hospitalise" sourceRef="Etapes_internes_evaluation_parcours_patient_hospitalise" targetRef="Fin_interne_evaluation_parcours_patient_hospitalise" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="projet_parcours_patient_hospitalise" name="Établir le projet de soins">
+      <bpmn:incoming>Flux_2_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:incoming>Flux_13_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_parcours_patient_hospitalise</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="split_parcours_patient_hospitalise" name="Soins coordonnés">
+      <bpmn:incoming>Flux_3_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:outgoing>Flux_4_parcours_patient_hospitalise</bpmn:outgoing>
+      <bpmn:outgoing>Flux_5_parcours_patient_hospitalise</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="prescriptions_parcours_patient_hospitalise" name="Mettre en œuvre les prescriptions">
+      <bpmn:incoming>Flux_4_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_parcours_patient_hospitalise</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="education_parcours_patient_hospitalise" name="Informer et éduquer le patient">
+      <bpmn:incoming>Flux_5_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_parcours_patient_hospitalise</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="incident_parcours_patient_hospitalise" name="Événement indésirable" attachedToRef="prescriptions_parcours_patient_hospitalise" cancelActivity="true">
+      <bpmn:outgoing>Flux_8_parcours_patient_hospitalise</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_incident_parcours_patient_hospitalise" errorRef="Erreur_parcours_patient_hospitalise" />
+    </bpmn:boundaryEvent>
+    <bpmn:subProcess id="securiser_parcours_patient_hospitalise" name="Sécuriser et déclarer l’événement">
+      <bpmn:incoming>Flux_8_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_parcours_patient_hospitalise</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_securiser_parcours_patient_hospitalise"><bpmn:outgoing>Flux_interne_1_securiser_parcours_patient_hospitalise</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_securiser_parcours_patient_hospitalise" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_securiser_parcours_patient_hospitalise</bpmn:incoming><bpmn:outgoing>Flux_interne_2_securiser_parcours_patient_hospitalise</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_securiser_parcours_patient_hospitalise"><bpmn:incoming>Flux_interne_2_securiser_parcours_patient_hospitalise</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_securiser_parcours_patient_hospitalise" sourceRef="Debut_interne_securiser_parcours_patient_hospitalise" targetRef="Etapes_internes_securiser_parcours_patient_hospitalise" />
+      <bpmn:sequenceFlow id="Flux_interne_2_securiser_parcours_patient_hospitalise" sourceRef="Etapes_internes_securiser_parcours_patient_hospitalise" targetRef="Fin_interne_securiser_parcours_patient_hospitalise" />
+    </bpmn:subProcess>
+    <bpmn:parallelGateway id="merge_parcours_patient_hospitalise" name="Réévaluation">
+      <bpmn:incoming>Flux_6_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:incoming>Flux_7_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_parcours_patient_hospitalise</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:intermediateCatchEvent id="revue_parcours_patient_hospitalise" name="Revue pluridisciplinaire">
+      <bpmn:incoming>Flux_9_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:incoming>Flux_10_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_parcours_patient_hospitalise</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="Definition_temps_revue_parcours_patient_hospitalise" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="objectifs_parcours_patient_hospitalise" name="Objectifs atteints ?">
+      <bpmn:incoming>Flux_11_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_parcours_patient_hospitalise</bpmn:outgoing>
+      <bpmn:outgoing>Flux_14_parcours_patient_hospitalise</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="adapter_parcours_patient_hospitalise" name="Adapter le projet de soins">
+      <bpmn:incoming>Flux_12_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:outgoing>Flux_13_parcours_patient_hospitalise</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="sortie_parcours_patient_hospitalise" name="Préparer la sortie">
+      <bpmn:incoming>Flux_14_parcours_patient_hospitalise</bpmn:incoming>
+      <bpmn:outgoing>Flux_15_parcours_patient_hospitalise</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="fin_parcours_patient_hospitalise" name="Séjour prêt à clôturer">
+      <bpmn:incoming>Flux_15_parcours_patient_hospitalise</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_parcours_patient_hospitalise" sourceRef="debut_parcours_patient_hospitalise" targetRef="evaluation_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_2_parcours_patient_hospitalise" sourceRef="evaluation_parcours_patient_hospitalise" targetRef="projet_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_3_parcours_patient_hospitalise" sourceRef="projet_parcours_patient_hospitalise" targetRef="split_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_4_parcours_patient_hospitalise" sourceRef="split_parcours_patient_hospitalise" targetRef="prescriptions_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_5_parcours_patient_hospitalise" sourceRef="split_parcours_patient_hospitalise" targetRef="education_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_6_parcours_patient_hospitalise" sourceRef="prescriptions_parcours_patient_hospitalise" targetRef="merge_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_7_parcours_patient_hospitalise" sourceRef="education_parcours_patient_hospitalise" targetRef="merge_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_8_parcours_patient_hospitalise" name="Exception" sourceRef="incident_parcours_patient_hospitalise" targetRef="securiser_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_9_parcours_patient_hospitalise" sourceRef="securiser_parcours_patient_hospitalise" targetRef="revue_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_10_parcours_patient_hospitalise" sourceRef="merge_parcours_patient_hospitalise" targetRef="revue_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_11_parcours_patient_hospitalise" sourceRef="revue_parcours_patient_hospitalise" targetRef="objectifs_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_12_parcours_patient_hospitalise" name="Non" sourceRef="objectifs_parcours_patient_hospitalise" targetRef="adapter_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_13_parcours_patient_hospitalise" sourceRef="adapter_parcours_patient_hospitalise" targetRef="projet_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_14_parcours_patient_hospitalise" name="Oui" sourceRef="objectifs_parcours_patient_hospitalise" targetRef="sortie_parcours_patient_hospitalise" />
+    <bpmn:sequenceFlow id="Flux_15_parcours_patient_hospitalise" sourceRef="sortie_parcours_patient_hospitalise" targetRef="fin_parcours_patient_hospitalise" />
+    <bpmn:dataObject id="Objet_plan_soins_parcours_patient_hospitalise" />
+    <bpmn:dataObjectReference id="Document_plan_soins_parcours_patient_hospitalise" name="Projet personnalisé de soins" dataObjectRef="Objet_plan_soins_parcours_patient_hospitalise" />
+    <bpmn:association id="Association_plan_soins_parcours_patient_hospitalise" sourceRef="Document_plan_soins_parcours_patient_hospitalise" targetRef="projet_parcours_patient_hospitalise" associationDirection="One" />
+    <bpmn:dataObject id="Objet_transmissions_parcours_patient_hospitalise" />
+    <bpmn:dataObjectReference id="Document_transmissions_parcours_patient_hospitalise" name="Transmissions ciblées" dataObjectRef="Objet_transmissions_parcours_patient_hospitalise" />
+    <bpmn:association id="Association_transmissions_parcours_patient_hospitalise" sourceRef="Document_transmissions_parcours_patient_hospitalise" targetRef="prescriptions_parcours_patient_hospitalise" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_parcours_patient_hospitalise">
+    <bpmndi:BPMNPlane id="Plan_parcours_patient_hospitalise" bpmnElement="Processus_parcours_patient_hospitalise">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_parcours_patient_hospitalise" bpmnElement="Couloir_1_parcours_patient_hospitalise" isHorizontal="true"><dc:Bounds x="20" y="30" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_parcours_patient_hospitalise" bpmnElement="Couloir_2_parcours_patient_hospitalise" isHorizontal="true"><dc:Bounds x="20" y="250" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_parcours_patient_hospitalise" bpmnElement="Couloir_3_parcours_patient_hospitalise" isHorizontal="true"><dc:Bounds x="20" y="470" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_parcours_patient_hospitalise" bpmnElement="debut_parcours_patient_hospitalise"><dc:Bounds x="60" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_evaluation_parcours_patient_hospitalise" bpmnElement="evaluation_parcours_patient_hospitalise" isExpanded="false"><dc:Bounds x="240" y="98" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_projet_parcours_patient_hospitalise" bpmnElement="projet_parcours_patient_hospitalise"><dc:Bounds x="420" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_split_parcours_patient_hospitalise" bpmnElement="split_parcours_patient_hospitalise" isMarkerVisible="true"><dc:Bounds x="600" y="548" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_prescriptions_parcours_patient_hospitalise" bpmnElement="prescriptions_parcours_patient_hospitalise"><dc:Bounds x="780" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_education_parcours_patient_hospitalise" bpmnElement="education_parcours_patient_hospitalise"><dc:Bounds x="780" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_incident_parcours_patient_hospitalise" bpmnElement="incident_parcours_patient_hospitalise"><dc:Bounds x="902" y="382" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_securiser_parcours_patient_hospitalise" bpmnElement="securiser_parcours_patient_hospitalise" isExpanded="false"><dc:Bounds x="960" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_merge_parcours_patient_hospitalise" bpmnElement="merge_parcours_patient_hospitalise" isMarkerVisible="true"><dc:Bounds x="960" y="548" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_revue_parcours_patient_hospitalise" bpmnElement="revue_parcours_patient_hospitalise"><dc:Bounds x="1140" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_objectifs_parcours_patient_hospitalise" bpmnElement="objectifs_parcours_patient_hospitalise" isMarkerVisible="true"><dc:Bounds x="1320" y="108" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_adapter_parcours_patient_hospitalise" bpmnElement="adapter_parcours_patient_hospitalise"><dc:Bounds x="1500" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_sortie_parcours_patient_hospitalise" bpmnElement="sortie_parcours_patient_hospitalise"><dc:Bounds x="1500" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_parcours_patient_hospitalise" bpmnElement="fin_parcours_patient_hospitalise"><dc:Bounds x="1680" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_plan_soins_parcours_patient_hospitalise" bpmnElement="Document_plan_soins_parcours_patient_hospitalise"><dc:Bounds x="540" y="629" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_transmissions_parcours_patient_hospitalise" bpmnElement="Document_transmissions_parcours_patient_hospitalise"><dc:Bounds x="900" y="409" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_parcours_patient_hospitalise" bpmnElement="Flux_1_parcours_patient_hospitalise"><di:waypoint x="96" y="354" /><di:waypoint x="168" y="354" /><di:waypoint x="168" y="141" /><di:waypoint x="240" y="141" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_parcours_patient_hospitalise" bpmnElement="Flux_2_parcours_patient_hospitalise"><di:waypoint x="390" y="141" /><di:waypoint x="405" y="141" /><di:waypoint x="405" y="580" /><di:waypoint x="420" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_parcours_patient_hospitalise" bpmnElement="Flux_3_parcours_patient_hospitalise"><di:waypoint x="560" y="580" /><di:waypoint x="580" y="580" /><di:waypoint x="580" y="573" /><di:waypoint x="600" y="573" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_parcours_patient_hospitalise" bpmnElement="Flux_4_parcours_patient_hospitalise"><di:waypoint x="650" y="573" /><di:waypoint x="715" y="573" /><di:waypoint x="715" y="360" /><di:waypoint x="780" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_parcours_patient_hospitalise" bpmnElement="Flux_5_parcours_patient_hospitalise"><di:waypoint x="650" y="573" /><di:waypoint x="715" y="573" /><di:waypoint x="715" y="580" /><di:waypoint x="780" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_parcours_patient_hospitalise" bpmnElement="Flux_6_parcours_patient_hospitalise"><di:waypoint x="920" y="360" /><di:waypoint x="940" y="360" /><di:waypoint x="940" y="573" /><di:waypoint x="960" y="573" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_parcours_patient_hospitalise" bpmnElement="Flux_7_parcours_patient_hospitalise"><di:waypoint x="920" y="580" /><di:waypoint x="940" y="580" /><di:waypoint x="940" y="573" /><di:waypoint x="960" y="573" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_parcours_patient_hospitalise" bpmnElement="Flux_8_parcours_patient_hospitalise"><di:waypoint x="932" y="397" /><di:waypoint x="946" y="397" /><di:waypoint x="946" y="361" /><di:waypoint x="960" y="361" /><bpmndi:BPMNLabel><dc:Bounds x="931" y="298" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_parcours_patient_hospitalise" bpmnElement="Flux_9_parcours_patient_hospitalise"><di:waypoint x="1110" y="361" /><di:waypoint x="1125" y="361" /><di:waypoint x="1125" y="574" /><di:waypoint x="1140" y="574" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_parcours_patient_hospitalise" bpmnElement="Flux_10_parcours_patient_hospitalise"><di:waypoint x="1010" y="573" /><di:waypoint x="1140" y="574" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_parcours_patient_hospitalise" bpmnElement="Flux_11_parcours_patient_hospitalise"><di:waypoint x="1176" y="574" /><di:waypoint x="1248" y="574" /><di:waypoint x="1248" y="133" /><di:waypoint x="1320" y="133" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_parcours_patient_hospitalise" bpmnElement="Flux_12_parcours_patient_hospitalise"><di:waypoint x="1370" y="133" /><di:waypoint x="1435" y="133" /><di:waypoint x="1435" y="140" /><di:waypoint x="1500" y="140" /><bpmndi:BPMNLabel><dc:Bounds x="1410" y="83" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_13_parcours_patient_hospitalise" bpmnElement="Flux_13_parcours_patient_hospitalise"><di:waypoint x="1640" y="140" /><di:waypoint x="1668" y="140" /><di:waypoint x="1668" y="651" /><di:waypoint x="392" y="651" /><di:waypoint x="392" y="580" /><di:waypoint x="420" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_14_parcours_patient_hospitalise" bpmnElement="Flux_14_parcours_patient_hospitalise"><di:waypoint x="1370" y="133" /><di:waypoint x="1435" y="133" /><di:waypoint x="1435" y="580" /><di:waypoint x="1500" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="1410" y="88" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_15_parcours_patient_hospitalise" bpmnElement="Flux_15_parcours_patient_hospitalise"><di:waypoint x="1640" y="580" /><di:waypoint x="1660" y="580" /><di:waypoint x="1660" y="574" /><di:waypoint x="1680" y="574" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_plan_soins_parcours_patient_hospitalise" bpmnElement="Association_plan_soins_parcours_patient_hospitalise"><di:waypoint x="558" y="653" /><di:waypoint x="490" y="617" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_transmissions_parcours_patient_hospitalise" bpmnElement="Association_transmissions_parcours_patient_hospitalise"><di:waypoint x="918" y="433" /><di:waypoint x="850" y="397" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

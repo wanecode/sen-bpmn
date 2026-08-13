@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_consultation_prenatale" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_consultation_prenatale" name="Message métier" />
+  <bpmn:error id="Erreur_consultation_prenatale" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_consultation_prenatale" name="Consultation prénatale" isExecutable="false">
+    <bpmn:documentation>Organiser le suivi clinique de la grossesse, le dépistage des risques et les conseils à la femme enceinte. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_consultation_prenatale">
+      <bpmn:lane id="Couloir_1_consultation_prenatale" name="Accueil maternité">
+        <bpmn:flowNodeRef>debut_consultation_prenatale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>dossier_consultation_prenatale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>prochain_consultation_prenatale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_consultation_prenatale</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_consultation_prenatale" name="Sage-femme">
+        <bpmn:flowNodeRef>consultation_consultation_prenatale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>danger_consultation_prenatale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>depistage_consultation_prenatale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>examens_consultation_prenatale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>conseils_consultation_prenatale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>merge_consultation_prenatale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>risque_consultation_prenatale</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_consultation_prenatale" name="Médecin / structure de référence">
+        <bpmn:flowNodeRef>urgence_consultation_prenatale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>specialise_consultation_prenatale</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_consultation_prenatale" name="Femme enceinte accueillie">
+      <bpmn:outgoing>Flux_1_consultation_prenatale</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="dossier_consultation_prenatale" name="Ouvrir ou mettre à jour le dossier">
+      <bpmn:incoming>Flux_1_consultation_prenatale</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_consultation_prenatale</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="consultation_consultation_prenatale" name="Réaliser la consultation prénatale">
+      <bpmn:incoming>Flux_2_consultation_prenatale</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_consultation_prenatale</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_consultation_consultation_prenatale"><bpmn:outgoing>Flux_interne_1_consultation_consultation_prenatale</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_consultation_consultation_prenatale" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_consultation_consultation_prenatale</bpmn:incoming><bpmn:outgoing>Flux_interne_2_consultation_consultation_prenatale</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_consultation_consultation_prenatale"><bpmn:incoming>Flux_interne_2_consultation_consultation_prenatale</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_consultation_consultation_prenatale" sourceRef="Debut_interne_consultation_consultation_prenatale" targetRef="Etapes_internes_consultation_consultation_prenatale" />
+      <bpmn:sequenceFlow id="Flux_interne_2_consultation_consultation_prenatale" sourceRef="Etapes_internes_consultation_consultation_prenatale" targetRef="Fin_interne_consultation_consultation_prenatale" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="danger_consultation_prenatale" name="Signe de danger" attachedToRef="consultation_consultation_prenatale" cancelActivity="true">
+      <bpmn:outgoing>Flux_3_consultation_prenatale</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_danger_consultation_prenatale" errorRef="Erreur_consultation_prenatale" />
+    </bpmn:boundaryEvent>
+    <bpmn:subProcess id="urgence_consultation_prenatale" name="Déclencher la référence urgente">
+      <bpmn:incoming>Flux_3_consultation_prenatale</bpmn:incoming>
+      <bpmn:outgoing>Flux_4_consultation_prenatale</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_urgence_consultation_prenatale"><bpmn:outgoing>Flux_interne_1_urgence_consultation_prenatale</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_urgence_consultation_prenatale" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_urgence_consultation_prenatale</bpmn:incoming><bpmn:outgoing>Flux_interne_2_urgence_consultation_prenatale</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_urgence_consultation_prenatale"><bpmn:incoming>Flux_interne_2_urgence_consultation_prenatale</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_urgence_consultation_prenatale" sourceRef="Debut_interne_urgence_consultation_prenatale" targetRef="Etapes_internes_urgence_consultation_prenatale" />
+      <bpmn:sequenceFlow id="Flux_interne_2_urgence_consultation_prenatale" sourceRef="Etapes_internes_urgence_consultation_prenatale" targetRef="Fin_interne_urgence_consultation_prenatale" />
+    </bpmn:subProcess>
+    <bpmn:parallelGateway id="depistage_consultation_prenatale" name="Dépistages et prévention">
+      <bpmn:incoming>Flux_5_consultation_prenatale</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_consultation_prenatale</bpmn:outgoing>
+      <bpmn:outgoing>Flux_7_consultation_prenatale</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="examens_consultation_prenatale" name="Prescrire ou vérifier les examens">
+      <bpmn:incoming>Flux_6_consultation_prenatale</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_consultation_prenatale</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="conseils_consultation_prenatale" name="Conseiller et préparer la naissance">
+      <bpmn:incoming>Flux_7_consultation_prenatale</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_consultation_prenatale</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="merge_consultation_prenatale" name="Synthèse prénatale">
+      <bpmn:incoming>Flux_8_consultation_prenatale</bpmn:incoming>
+      <bpmn:incoming>Flux_9_consultation_prenatale</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_consultation_prenatale</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="risque_consultation_prenatale" name="Grossesse à risque ?">
+      <bpmn:incoming>Flux_10_consultation_prenatale</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_consultation_prenatale</bpmn:outgoing>
+      <bpmn:outgoing>Flux_12_consultation_prenatale</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="specialise_consultation_prenatale" name="Rendez-vous spécialisé confirmé">
+      <bpmn:incoming>Flux_11_consultation_prenatale</bpmn:incoming>
+      <bpmn:outgoing>Flux_13_consultation_prenatale</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_specialise_consultation_prenatale" messageRef="Message_consultation_prenatale" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="prochain_consultation_prenatale" name="Fixer le prochain rendez-vous">
+      <bpmn:incoming>Flux_12_consultation_prenatale</bpmn:incoming>
+      <bpmn:incoming>Flux_13_consultation_prenatale</bpmn:incoming>
+      <bpmn:outgoing>Flux_14_consultation_prenatale</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="fin_consultation_prenatale" name="Suivi planifié">
+      <bpmn:incoming>Flux_4_consultation_prenatale</bpmn:incoming>
+      <bpmn:incoming>Flux_14_consultation_prenatale</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_consultation_prenatale" sourceRef="debut_consultation_prenatale" targetRef="dossier_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_2_consultation_prenatale" sourceRef="dossier_consultation_prenatale" targetRef="consultation_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_3_consultation_prenatale" name="Exception" sourceRef="danger_consultation_prenatale" targetRef="urgence_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_4_consultation_prenatale" sourceRef="urgence_consultation_prenatale" targetRef="fin_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_5_consultation_prenatale" sourceRef="consultation_consultation_prenatale" targetRef="depistage_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_6_consultation_prenatale" sourceRef="depistage_consultation_prenatale" targetRef="examens_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_7_consultation_prenatale" sourceRef="depistage_consultation_prenatale" targetRef="conseils_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_8_consultation_prenatale" sourceRef="examens_consultation_prenatale" targetRef="merge_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_9_consultation_prenatale" sourceRef="conseils_consultation_prenatale" targetRef="merge_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_10_consultation_prenatale" sourceRef="merge_consultation_prenatale" targetRef="risque_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_11_consultation_prenatale" name="Oui" sourceRef="risque_consultation_prenatale" targetRef="specialise_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_12_consultation_prenatale" name="Non" sourceRef="risque_consultation_prenatale" targetRef="prochain_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_13_consultation_prenatale" sourceRef="specialise_consultation_prenatale" targetRef="prochain_consultation_prenatale" />
+    <bpmn:sequenceFlow id="Flux_14_consultation_prenatale" sourceRef="prochain_consultation_prenatale" targetRef="fin_consultation_prenatale" />
+    <bpmn:dataObject id="Objet_carnet_consultation_prenatale" />
+    <bpmn:dataObjectReference id="Document_carnet_consultation_prenatale" name="Carnet de santé de la mère et de l’enfant" dataObjectRef="Objet_carnet_consultation_prenatale" />
+    <bpmn:association id="Association_carnet_consultation_prenatale" sourceRef="Document_carnet_consultation_prenatale" targetRef="consultation_consultation_prenatale" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_consultation_prenatale">
+    <bpmndi:BPMNPlane id="Plan_consultation_prenatale" bpmnElement="Processus_consultation_prenatale">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_consultation_prenatale" bpmnElement="Couloir_1_consultation_prenatale" isHorizontal="true"><dc:Bounds x="20" y="30" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_consultation_prenatale" bpmnElement="Couloir_2_consultation_prenatale" isHorizontal="true"><dc:Bounds x="20" y="250" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_consultation_prenatale" bpmnElement="Couloir_3_consultation_prenatale" isHorizontal="true"><dc:Bounds x="20" y="470" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_consultation_prenatale" bpmnElement="debut_consultation_prenatale"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_dossier_consultation_prenatale" bpmnElement="dossier_consultation_prenatale"><dc:Bounds x="240" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_consultation_consultation_prenatale" bpmnElement="consultation_consultation_prenatale" isExpanded="false"><dc:Bounds x="420" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_danger_consultation_prenatale" bpmnElement="danger_consultation_prenatale"><dc:Bounds x="552" y="389" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_urgence_consultation_prenatale" bpmnElement="urgence_consultation_prenatale" isExpanded="false"><dc:Bounds x="600" y="538" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_depistage_consultation_prenatale" bpmnElement="depistage_consultation_prenatale" isMarkerVisible="true"><dc:Bounds x="600" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_examens_consultation_prenatale" bpmnElement="examens_consultation_prenatale"><dc:Bounds x="780" y="275" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_conseils_consultation_prenatale" bpmnElement="conseils_consultation_prenatale"><dc:Bounds x="780" y="375" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_merge_consultation_prenatale" bpmnElement="merge_consultation_prenatale" isMarkerVisible="true"><dc:Bounds x="960" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_risque_consultation_prenatale" bpmnElement="risque_consultation_prenatale" isMarkerVisible="true"><dc:Bounds x="1140" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_specialise_consultation_prenatale" bpmnElement="specialise_consultation_prenatale"><dc:Bounds x="1320" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_prochain_consultation_prenatale" bpmnElement="prochain_consultation_prenatale"><dc:Bounds x="1320" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_consultation_prenatale" bpmnElement="fin_consultation_prenatale"><dc:Bounds x="1500" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_carnet_consultation_prenatale" bpmnElement="Document_carnet_consultation_prenatale"><dc:Bounds x="550" y="412" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_consultation_prenatale" bpmnElement="Flux_1_consultation_prenatale"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="140" /><di:waypoint x="240" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_consultation_prenatale" bpmnElement="Flux_2_consultation_prenatale"><di:waypoint x="380" y="140" /><di:waypoint x="400" y="140" /><di:waypoint x="400" y="361" /><di:waypoint x="420" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_consultation_prenatale" bpmnElement="Flux_3_consultation_prenatale"><di:waypoint x="582" y="404" /><di:waypoint x="591" y="404" /><di:waypoint x="591" y="581" /><di:waypoint x="600" y="581" /><bpmndi:BPMNLabel><dc:Bounds x="576" y="369" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_consultation_prenatale" bpmnElement="Flux_4_consultation_prenatale"><di:waypoint x="750" y="581" /><di:waypoint x="1125" y="581" /><di:waypoint x="1125" y="134" /><di:waypoint x="1500" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_consultation_prenatale" bpmnElement="Flux_5_consultation_prenatale"><di:waypoint x="570" y="361" /><di:waypoint x="585" y="361" /><di:waypoint x="585" y="353" /><di:waypoint x="600" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_consultation_prenatale" bpmnElement="Flux_6_consultation_prenatale"><di:waypoint x="650" y="353" /><di:waypoint x="715" y="353" /><di:waypoint x="715" y="312" /><di:waypoint x="780" y="312" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_consultation_prenatale" bpmnElement="Flux_7_consultation_prenatale"><di:waypoint x="650" y="353" /><di:waypoint x="715" y="353" /><di:waypoint x="715" y="412" /><di:waypoint x="780" y="412" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_consultation_prenatale" bpmnElement="Flux_8_consultation_prenatale"><di:waypoint x="920" y="312" /><di:waypoint x="940" y="312" /><di:waypoint x="940" y="353" /><di:waypoint x="960" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_consultation_prenatale" bpmnElement="Flux_9_consultation_prenatale"><di:waypoint x="920" y="412" /><di:waypoint x="940" y="412" /><di:waypoint x="940" y="353" /><di:waypoint x="960" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_consultation_prenatale" bpmnElement="Flux_10_consultation_prenatale"><di:waypoint x="1010" y="353" /><di:waypoint x="1140" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_consultation_prenatale" bpmnElement="Flux_11_consultation_prenatale"><di:waypoint x="1190" y="353" /><di:waypoint x="1255" y="353" /><di:waypoint x="1255" y="574" /><di:waypoint x="1320" y="574" /><bpmndi:BPMNLabel><dc:Bounds x="1230" y="308" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_consultation_prenatale" bpmnElement="Flux_12_consultation_prenatale"><di:waypoint x="1190" y="353" /><di:waypoint x="1255" y="353" /><di:waypoint x="1255" y="140" /><di:waypoint x="1320" y="140" /><bpmndi:BPMNLabel><dc:Bounds x="1230" y="83" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_13_consultation_prenatale" bpmnElement="Flux_13_consultation_prenatale"><di:waypoint x="1356" y="574" /><di:waypoint x="1384" y="574" /><di:waypoint x="1384" y="626" /><di:waypoint x="1292" y="626" /><di:waypoint x="1292" y="140" /><di:waypoint x="1320" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_14_consultation_prenatale" bpmnElement="Flux_14_consultation_prenatale"><di:waypoint x="1460" y="140" /><di:waypoint x="1480" y="140" /><di:waypoint x="1480" y="134" /><di:waypoint x="1500" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_carnet_consultation_prenatale" bpmnElement="Association_carnet_consultation_prenatale"><di:waypoint x="568" y="436" /><di:waypoint x="495" y="404" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_prise_rendez_vous_consultation" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_prise_rendez_vous_consultation" name="Message métier" />
+  <bpmn:error id="Erreur_prise_rendez_vous_consultation" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_prise_rendez_vous_consultation" name="Prise de rendez-vous en consultation" isExecutable="false">
+    <bpmn:documentation>Enregistrer une demande, vérifier les éléments utiles et proposer un créneau adapté à la spécialité. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_prise_rendez_vous_consultation">
+      <bpmn:lane id="Couloir_1_prise_rendez_vous_consultation" name="Patient ou accompagnant">
+        <bpmn:flowNodeRef>debut_prise_rendez_vous_consultation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>completer_prise_rendez_vous_consultation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>confirmer_prise_rendez_vous_consultation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_prise_rendez_vous_consultation</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_prise_rendez_vous_consultation" name="Secrétariat médical">
+        <bpmn:flowNodeRef>identifier_prise_rendez_vous_consultation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>verifier_prise_rendez_vous_consultation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>incomplet_prise_rendez_vous_consultation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>reserver_prise_rendez_vous_consultation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>alternative_prise_rendez_vous_consultation</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_prise_rendez_vous_consultation" name="Service clinique">
+        <bpmn:flowNodeRef>agenda_prise_rendez_vous_consultation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>disponible_prise_rendez_vous_consultation</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_prise_rendez_vous_consultation" name="Demande reçue">
+      <bpmn:outgoing>Flux_1_prise_rendez_vous_consultation</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="identifier_prise_rendez_vous_consultation" name="Identifier le patient et le besoin">
+      <bpmn:incoming>Flux_1_prise_rendez_vous_consultation</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_prise_rendez_vous_consultation</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="verifier_prise_rendez_vous_consultation" name="Vérifier prérequis et orientation">
+      <bpmn:incoming>Flux_2_prise_rendez_vous_consultation</bpmn:incoming>
+      <bpmn:incoming>Flux_5_prise_rendez_vous_consultation</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_prise_rendez_vous_consultation</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_verifier_prise_rendez_vous_consultation"><bpmn:outgoing>Flux_interne_1_verifier_prise_rendez_vous_consultation</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_verifier_prise_rendez_vous_consultation" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_verifier_prise_rendez_vous_consultation</bpmn:incoming><bpmn:outgoing>Flux_interne_2_verifier_prise_rendez_vous_consultation</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_verifier_prise_rendez_vous_consultation"><bpmn:incoming>Flux_interne_2_verifier_prise_rendez_vous_consultation</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_verifier_prise_rendez_vous_consultation" sourceRef="Debut_interne_verifier_prise_rendez_vous_consultation" targetRef="Etapes_internes_verifier_prise_rendez_vous_consultation" />
+      <bpmn:sequenceFlow id="Flux_interne_2_verifier_prise_rendez_vous_consultation" sourceRef="Etapes_internes_verifier_prise_rendez_vous_consultation" targetRef="Fin_interne_verifier_prise_rendez_vous_consultation" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="incomplet_prise_rendez_vous_consultation" name="Informations incomplètes" attachedToRef="verifier_prise_rendez_vous_consultation" cancelActivity="true">
+      <bpmn:outgoing>Flux_4_prise_rendez_vous_consultation</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_incomplet_prise_rendez_vous_consultation" errorRef="Erreur_prise_rendez_vous_consultation" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="completer_prise_rendez_vous_consultation" name="Demander les éléments manquants">
+      <bpmn:incoming>Flux_4_prise_rendez_vous_consultation</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_prise_rendez_vous_consultation</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="agenda_prise_rendez_vous_consultation" name="Consulter l’agenda spécialisé">
+      <bpmn:incoming>Flux_3_prise_rendez_vous_consultation</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_prise_rendez_vous_consultation</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="disponible_prise_rendez_vous_consultation" name="Créneau adapté disponible ?">
+      <bpmn:incoming>Flux_6_prise_rendez_vous_consultation</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_prise_rendez_vous_consultation</bpmn:outgoing>
+      <bpmn:outgoing>Flux_8_prise_rendez_vous_consultation</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="reserver_prise_rendez_vous_consultation" name="Réserver le créneau">
+      <bpmn:incoming>Flux_7_prise_rendez_vous_consultation</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_prise_rendez_vous_consultation</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="alternative_prise_rendez_vous_consultation" name="Proposer liste d’attente ou autre site">
+      <bpmn:incoming>Flux_8_prise_rendez_vous_consultation</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_prise_rendez_vous_consultation</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="confirmer_prise_rendez_vous_consultation" name="Confirmation envoyée">
+      <bpmn:incoming>Flux_9_prise_rendez_vous_consultation</bpmn:incoming>
+      <bpmn:incoming>Flux_10_prise_rendez_vous_consultation</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_prise_rendez_vous_consultation</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_confirmer_prise_rendez_vous_consultation" messageRef="Message_prise_rendez_vous_consultation" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="fin_prise_rendez_vous_consultation" name="Rendez-vous organisé">
+      <bpmn:incoming>Flux_11_prise_rendez_vous_consultation</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_prise_rendez_vous_consultation" sourceRef="debut_prise_rendez_vous_consultation" targetRef="identifier_prise_rendez_vous_consultation" />
+    <bpmn:sequenceFlow id="Flux_2_prise_rendez_vous_consultation" sourceRef="identifier_prise_rendez_vous_consultation" targetRef="verifier_prise_rendez_vous_consultation" />
+    <bpmn:sequenceFlow id="Flux_3_prise_rendez_vous_consultation" sourceRef="verifier_prise_rendez_vous_consultation" targetRef="agenda_prise_rendez_vous_consultation" />
+    <bpmn:sequenceFlow id="Flux_4_prise_rendez_vous_consultation" name="Exception" sourceRef="incomplet_prise_rendez_vous_consultation" targetRef="completer_prise_rendez_vous_consultation" />
+    <bpmn:sequenceFlow id="Flux_5_prise_rendez_vous_consultation" sourceRef="completer_prise_rendez_vous_consultation" targetRef="verifier_prise_rendez_vous_consultation" />
+    <bpmn:sequenceFlow id="Flux_6_prise_rendez_vous_consultation" sourceRef="agenda_prise_rendez_vous_consultation" targetRef="disponible_prise_rendez_vous_consultation" />
+    <bpmn:sequenceFlow id="Flux_7_prise_rendez_vous_consultation" name="Oui" sourceRef="disponible_prise_rendez_vous_consultation" targetRef="reserver_prise_rendez_vous_consultation" />
+    <bpmn:sequenceFlow id="Flux_8_prise_rendez_vous_consultation" name="Non" sourceRef="disponible_prise_rendez_vous_consultation" targetRef="alternative_prise_rendez_vous_consultation" />
+    <bpmn:sequenceFlow id="Flux_9_prise_rendez_vous_consultation" sourceRef="reserver_prise_rendez_vous_consultation" targetRef="confirmer_prise_rendez_vous_consultation" />
+    <bpmn:sequenceFlow id="Flux_10_prise_rendez_vous_consultation" sourceRef="alternative_prise_rendez_vous_consultation" targetRef="confirmer_prise_rendez_vous_consultation" />
+    <bpmn:sequenceFlow id="Flux_11_prise_rendez_vous_consultation" sourceRef="confirmer_prise_rendez_vous_consultation" targetRef="fin_prise_rendez_vous_consultation" />
+    <bpmn:dataObject id="Objet_convocation_prise_rendez_vous_consultation" />
+    <bpmn:dataObjectReference id="Document_convocation_prise_rendez_vous_consultation" name="Convocation de consultation" dataObjectRef="Objet_convocation_prise_rendez_vous_consultation" />
+    <bpmn:association id="Association_convocation_prise_rendez_vous_consultation" sourceRef="Document_convocation_prise_rendez_vous_consultation" targetRef="confirmer_prise_rendez_vous_consultation" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_prise_rendez_vous_consultation">
+    <bpmndi:BPMNPlane id="Plan_prise_rendez_vous_consultation" bpmnElement="Processus_prise_rendez_vous_consultation">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_prise_rendez_vous_consultation" bpmnElement="Couloir_1_prise_rendez_vous_consultation" isHorizontal="true"><dc:Bounds x="20" y="30" width="1630" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_prise_rendez_vous_consultation" bpmnElement="Couloir_2_prise_rendez_vous_consultation" isHorizontal="true"><dc:Bounds x="20" y="250" width="1630" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_prise_rendez_vous_consultation" bpmnElement="Couloir_3_prise_rendez_vous_consultation" isHorizontal="true"><dc:Bounds x="20" y="470" width="1630" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_prise_rendez_vous_consultation" bpmnElement="debut_prise_rendez_vous_consultation"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_identifier_prise_rendez_vous_consultation" bpmnElement="identifier_prise_rendez_vous_consultation"><dc:Bounds x="240" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_verifier_prise_rendez_vous_consultation" bpmnElement="verifier_prise_rendez_vous_consultation" isExpanded="false"><dc:Bounds x="420" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_incomplet_prise_rendez_vous_consultation" bpmnElement="incomplet_prise_rendez_vous_consultation"><dc:Bounds x="552" y="389" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_completer_prise_rendez_vous_consultation" bpmnElement="completer_prise_rendez_vous_consultation"><dc:Bounds x="600" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_agenda_prise_rendez_vous_consultation" bpmnElement="agenda_prise_rendez_vous_consultation"><dc:Bounds x="600" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_disponible_prise_rendez_vous_consultation" bpmnElement="disponible_prise_rendez_vous_consultation" isMarkerVisible="true"><dc:Bounds x="780" y="548" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_reserver_prise_rendez_vous_consultation" bpmnElement="reserver_prise_rendez_vous_consultation"><dc:Bounds x="960" y="275" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_alternative_prise_rendez_vous_consultation" bpmnElement="alternative_prise_rendez_vous_consultation"><dc:Bounds x="960" y="375" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_confirmer_prise_rendez_vous_consultation" bpmnElement="confirmer_prise_rendez_vous_consultation"><dc:Bounds x="1140" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_prise_rendez_vous_consultation" bpmnElement="fin_prise_rendez_vous_consultation"><dc:Bounds x="1320" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_convocation_prise_rendez_vous_consultation" bpmnElement="Document_convocation_prise_rendez_vous_consultation"><dc:Bounds x="1156" y="164" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_prise_rendez_vous_consultation" bpmnElement="Flux_1_prise_rendez_vous_consultation"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="360" /><di:waypoint x="240" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_prise_rendez_vous_consultation" bpmnElement="Flux_2_prise_rendez_vous_consultation"><di:waypoint x="380" y="360" /><di:waypoint x="420" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_prise_rendez_vous_consultation" bpmnElement="Flux_3_prise_rendez_vous_consultation"><di:waypoint x="570" y="361" /><di:waypoint x="585" y="361" /><di:waypoint x="585" y="580" /><di:waypoint x="600" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_prise_rendez_vous_consultation" bpmnElement="Flux_4_prise_rendez_vous_consultation"><di:waypoint x="582" y="404" /><di:waypoint x="591" y="404" /><di:waypoint x="591" y="140" /><di:waypoint x="600" y="140" /><bpmndi:BPMNLabel><dc:Bounds x="576" y="83" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_prise_rendez_vous_consultation" bpmnElement="Flux_5_prise_rendez_vous_consultation"><di:waypoint x="740" y="140" /><di:waypoint x="768" y="140" /><di:waypoint x="768" y="438" /><di:waypoint x="392" y="438" /><di:waypoint x="392" y="361" /><di:waypoint x="420" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_prise_rendez_vous_consultation" bpmnElement="Flux_6_prise_rendez_vous_consultation"><di:waypoint x="740" y="580" /><di:waypoint x="760" y="580" /><di:waypoint x="760" y="573" /><di:waypoint x="780" y="573" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_prise_rendez_vous_consultation" bpmnElement="Flux_7_prise_rendez_vous_consultation"><di:waypoint x="830" y="573" /><di:waypoint x="895" y="573" /><di:waypoint x="895" y="312" /><di:waypoint x="960" y="312" /><bpmndi:BPMNLabel><dc:Bounds x="870" y="255" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_prise_rendez_vous_consultation" bpmnElement="Flux_8_prise_rendez_vous_consultation"><di:waypoint x="830" y="573" /><di:waypoint x="895" y="573" /><di:waypoint x="895" y="412" /><di:waypoint x="960" y="412" /><bpmndi:BPMNLabel><dc:Bounds x="870" y="355" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_prise_rendez_vous_consultation" bpmnElement="Flux_9_prise_rendez_vous_consultation"><di:waypoint x="1100" y="312" /><di:waypoint x="1120" y="312" /><di:waypoint x="1120" y="134" /><di:waypoint x="1140" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_prise_rendez_vous_consultation" bpmnElement="Flux_10_prise_rendez_vous_consultation"><di:waypoint x="1100" y="412" /><di:waypoint x="1120" y="412" /><di:waypoint x="1120" y="134" /><di:waypoint x="1140" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_prise_rendez_vous_consultation" bpmnElement="Flux_11_prise_rendez_vous_consultation"><di:waypoint x="1176" y="134" /><di:waypoint x="1320" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_convocation_prise_rendez_vous_consultation" bpmnElement="Association_convocation_prise_rendez_vous_consultation"><di:waypoint x="1174" y="188" /><di:waypoint x="1158" y="152" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

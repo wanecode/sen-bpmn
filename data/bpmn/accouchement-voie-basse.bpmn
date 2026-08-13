@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_accouchement_voie_basse" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_accouchement_voie_basse" name="Message métier" />
+  <bpmn:error id="Erreur_accouchement_voie_basse" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_accouchement_voie_basse" name="Accouchement par voie basse" isExecutable="false">
+    <bpmn:documentation>Décrire la surveillance du travail, la naissance, les soins immédiats et la prévention des complications. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_accouchement_voie_basse">
+      <bpmn:lane id="Couloir_1_accouchement_voie_basse" name="Sage-femme">
+        <bpmn:flowNodeRef>debut_accouchement_voie_basse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>admettre_accouchement_voie_basse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>surveiller_accouchement_voie_basse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>anomalie_accouchement_voie_basse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>complet_accouchement_voie_basse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>naissance_accouchement_voie_basse</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_accouchement_voie_basse" name="Équipe obstétricale">
+        <bpmn:flowNodeRef>alerte_accouchement_voie_basse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_accouchement_voie_basse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>mere_accouchement_voie_basse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>merge_accouchement_voie_basse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_accouchement_voie_basse</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_accouchement_voie_basse" name="Équipe nouveau-né">
+        <bpmn:flowNodeRef>nouveau_ne_accouchement_voie_basse</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_accouchement_voie_basse" name="Travail confirmé">
+      <bpmn:outgoing>Flux_1_accouchement_voie_basse</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="admettre_accouchement_voie_basse" name="Admettre et évaluer le risque">
+      <bpmn:incoming>Flux_1_accouchement_voie_basse</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_accouchement_voie_basse</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="surveiller_accouchement_voie_basse" name="Surveiller le travail au partogramme">
+      <bpmn:incoming>Flux_2_accouchement_voie_basse</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_accouchement_voie_basse</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_surveiller_accouchement_voie_basse"><bpmn:outgoing>Flux_interne_1_surveiller_accouchement_voie_basse</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_surveiller_accouchement_voie_basse" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_surveiller_accouchement_voie_basse</bpmn:incoming><bpmn:outgoing>Flux_interne_2_surveiller_accouchement_voie_basse</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_surveiller_accouchement_voie_basse"><bpmn:incoming>Flux_interne_2_surveiller_accouchement_voie_basse</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_surveiller_accouchement_voie_basse" sourceRef="Debut_interne_surveiller_accouchement_voie_basse" targetRef="Etapes_internes_surveiller_accouchement_voie_basse" />
+      <bpmn:sequenceFlow id="Flux_interne_2_surveiller_accouchement_voie_basse" sourceRef="Etapes_internes_surveiller_accouchement_voie_basse" targetRef="Fin_interne_surveiller_accouchement_voie_basse" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="anomalie_accouchement_voie_basse" name="Anomalie maternelle ou fœtale" attachedToRef="surveiller_accouchement_voie_basse" cancelActivity="true">
+      <bpmn:outgoing>Flux_4_accouchement_voie_basse</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_anomalie_accouchement_voie_basse" errorRef="Erreur_accouchement_voie_basse" />
+    </bpmn:boundaryEvent>
+    <bpmn:subProcess id="alerte_accouchement_voie_basse" name="Activer l’urgence obstétricale">
+      <bpmn:incoming>Flux_4_accouchement_voie_basse</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_accouchement_voie_basse</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_alerte_accouchement_voie_basse"><bpmn:outgoing>Flux_interne_1_alerte_accouchement_voie_basse</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_alerte_accouchement_voie_basse" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_alerte_accouchement_voie_basse</bpmn:incoming><bpmn:outgoing>Flux_interne_2_alerte_accouchement_voie_basse</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_alerte_accouchement_voie_basse"><bpmn:incoming>Flux_interne_2_alerte_accouchement_voie_basse</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_alerte_accouchement_voie_basse" sourceRef="Debut_interne_alerte_accouchement_voie_basse" targetRef="Etapes_internes_alerte_accouchement_voie_basse" />
+      <bpmn:sequenceFlow id="Flux_interne_2_alerte_accouchement_voie_basse" sourceRef="Etapes_internes_alerte_accouchement_voie_basse" targetRef="Fin_interne_alerte_accouchement_voie_basse" />
+    </bpmn:subProcess>
+    <bpmn:intermediateCatchEvent id="complet_accouchement_voie_basse" name="Dilatation complète">
+      <bpmn:incoming>Flux_3_accouchement_voie_basse</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_accouchement_voie_basse</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="Definition_temps_complet_accouchement_voie_basse" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:manualTask id="naissance_accouchement_voie_basse" name="Accompagner l’expulsion et la naissance">
+      <bpmn:incoming>Flux_6_accouchement_voie_basse</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_accouchement_voie_basse</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:parallelGateway id="split_accouchement_voie_basse" name="Soins immédiats">
+      <bpmn:incoming>Flux_7_accouchement_voie_basse</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_accouchement_voie_basse</bpmn:outgoing>
+      <bpmn:outgoing>Flux_9_accouchement_voie_basse</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="mere_accouchement_voie_basse" name="Surveiller délivrance et post-partum">
+      <bpmn:incoming>Flux_8_accouchement_voie_basse</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_accouchement_voie_basse</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="nouveau_ne_accouchement_voie_basse" name="Réaliser les soins du nouveau-né">
+      <bpmn:incoming>Flux_9_accouchement_voie_basse</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_accouchement_voie_basse</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_nouveau_ne_accouchement_voie_basse"><bpmn:outgoing>Flux_interne_1_nouveau_ne_accouchement_voie_basse</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_nouveau_ne_accouchement_voie_basse" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_nouveau_ne_accouchement_voie_basse</bpmn:incoming><bpmn:outgoing>Flux_interne_2_nouveau_ne_accouchement_voie_basse</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_nouveau_ne_accouchement_voie_basse"><bpmn:incoming>Flux_interne_2_nouveau_ne_accouchement_voie_basse</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_nouveau_ne_accouchement_voie_basse" sourceRef="Debut_interne_nouveau_ne_accouchement_voie_basse" targetRef="Etapes_internes_nouveau_ne_accouchement_voie_basse" />
+      <bpmn:sequenceFlow id="Flux_interne_2_nouveau_ne_accouchement_voie_basse" sourceRef="Etapes_internes_nouveau_ne_accouchement_voie_basse" targetRef="Fin_interne_nouveau_ne_accouchement_voie_basse" />
+    </bpmn:subProcess>
+    <bpmn:parallelGateway id="merge_accouchement_voie_basse" name="Mère et enfant stables">
+      <bpmn:incoming>Flux_10_accouchement_voie_basse</bpmn:incoming>
+      <bpmn:incoming>Flux_11_accouchement_voie_basse</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_accouchement_voie_basse</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:endEvent id="fin_accouchement_voie_basse" name="Surveillance post-partum engagée">
+      <bpmn:incoming>Flux_5_accouchement_voie_basse</bpmn:incoming>
+      <bpmn:incoming>Flux_12_accouchement_voie_basse</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_accouchement_voie_basse" sourceRef="debut_accouchement_voie_basse" targetRef="admettre_accouchement_voie_basse" />
+    <bpmn:sequenceFlow id="Flux_2_accouchement_voie_basse" sourceRef="admettre_accouchement_voie_basse" targetRef="surveiller_accouchement_voie_basse" />
+    <bpmn:sequenceFlow id="Flux_3_accouchement_voie_basse" sourceRef="surveiller_accouchement_voie_basse" targetRef="complet_accouchement_voie_basse" />
+    <bpmn:sequenceFlow id="Flux_4_accouchement_voie_basse" name="Exception" sourceRef="anomalie_accouchement_voie_basse" targetRef="alerte_accouchement_voie_basse" />
+    <bpmn:sequenceFlow id="Flux_5_accouchement_voie_basse" sourceRef="alerte_accouchement_voie_basse" targetRef="fin_accouchement_voie_basse" />
+    <bpmn:sequenceFlow id="Flux_6_accouchement_voie_basse" sourceRef="complet_accouchement_voie_basse" targetRef="naissance_accouchement_voie_basse" />
+    <bpmn:sequenceFlow id="Flux_7_accouchement_voie_basse" sourceRef="naissance_accouchement_voie_basse" targetRef="split_accouchement_voie_basse" />
+    <bpmn:sequenceFlow id="Flux_8_accouchement_voie_basse" sourceRef="split_accouchement_voie_basse" targetRef="mere_accouchement_voie_basse" />
+    <bpmn:sequenceFlow id="Flux_9_accouchement_voie_basse" sourceRef="split_accouchement_voie_basse" targetRef="nouveau_ne_accouchement_voie_basse" />
+    <bpmn:sequenceFlow id="Flux_10_accouchement_voie_basse" sourceRef="mere_accouchement_voie_basse" targetRef="merge_accouchement_voie_basse" />
+    <bpmn:sequenceFlow id="Flux_11_accouchement_voie_basse" sourceRef="nouveau_ne_accouchement_voie_basse" targetRef="merge_accouchement_voie_basse" />
+    <bpmn:sequenceFlow id="Flux_12_accouchement_voie_basse" sourceRef="merge_accouchement_voie_basse" targetRef="fin_accouchement_voie_basse" />
+    <bpmn:dataObject id="Objet_partogramme_accouchement_voie_basse" />
+    <bpmn:dataObjectReference id="Document_partogramme_accouchement_voie_basse" name="Partogramme" dataObjectRef="Objet_partogramme_accouchement_voie_basse" />
+    <bpmn:association id="Association_partogramme_accouchement_voie_basse" sourceRef="Document_partogramme_accouchement_voie_basse" targetRef="surveiller_accouchement_voie_basse" associationDirection="One" />
+    <bpmn:dataObject id="Objet_registre_accouchement_voie_basse" />
+    <bpmn:dataObjectReference id="Document_registre_accouchement_voie_basse" name="Registre d’accouchement" dataObjectRef="Objet_registre_accouchement_voie_basse" />
+    <bpmn:association id="Association_registre_accouchement_voie_basse" sourceRef="Document_registre_accouchement_voie_basse" targetRef="naissance_accouchement_voie_basse" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_accouchement_voie_basse">
+    <bpmndi:BPMNPlane id="Plan_accouchement_voie_basse" bpmnElement="Processus_accouchement_voie_basse">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_accouchement_voie_basse" bpmnElement="Couloir_1_accouchement_voie_basse" isHorizontal="true"><dc:Bounds x="20" y="30" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_accouchement_voie_basse" bpmnElement="Couloir_2_accouchement_voie_basse" isHorizontal="true"><dc:Bounds x="20" y="250" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_accouchement_voie_basse" bpmnElement="Couloir_3_accouchement_voie_basse" isHorizontal="true"><dc:Bounds x="20" y="470" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_accouchement_voie_basse" bpmnElement="debut_accouchement_voie_basse"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_admettre_accouchement_voie_basse" bpmnElement="admettre_accouchement_voie_basse"><dc:Bounds x="240" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_surveiller_accouchement_voie_basse" bpmnElement="surveiller_accouchement_voie_basse" isExpanded="false"><dc:Bounds x="420" y="98" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_anomalie_accouchement_voie_basse" bpmnElement="anomalie_accouchement_voie_basse"><dc:Bounds x="552" y="169" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_alerte_accouchement_voie_basse" bpmnElement="alerte_accouchement_voie_basse" isExpanded="false"><dc:Bounds x="600" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_complet_accouchement_voie_basse" bpmnElement="complet_accouchement_voie_basse"><dc:Bounds x="600" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_naissance_accouchement_voie_basse" bpmnElement="naissance_accouchement_voie_basse"><dc:Bounds x="780" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_split_accouchement_voie_basse" bpmnElement="split_accouchement_voie_basse" isMarkerVisible="true"><dc:Bounds x="960" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_mere_accouchement_voie_basse" bpmnElement="mere_accouchement_voie_basse"><dc:Bounds x="1140" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_nouveau_ne_accouchement_voie_basse" bpmnElement="nouveau_ne_accouchement_voie_basse" isExpanded="false"><dc:Bounds x="1140" y="538" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_merge_accouchement_voie_basse" bpmnElement="merge_accouchement_voie_basse" isMarkerVisible="true"><dc:Bounds x="1320" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_accouchement_voie_basse" bpmnElement="fin_accouchement_voie_basse"><dc:Bounds x="1500" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_partogramme_accouchement_voie_basse" bpmnElement="Document_partogramme_accouchement_voie_basse"><dc:Bounds x="550" y="192" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_registre_accouchement_voie_basse" bpmnElement="Document_registre_accouchement_voie_basse"><dc:Bounds x="900" y="189" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_accouchement_voie_basse" bpmnElement="Flux_1_accouchement_voie_basse"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="140" /><di:waypoint x="240" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_accouchement_voie_basse" bpmnElement="Flux_2_accouchement_voie_basse"><di:waypoint x="380" y="140" /><di:waypoint x="420" y="141" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_accouchement_voie_basse" bpmnElement="Flux_3_accouchement_voie_basse"><di:waypoint x="570" y="141" /><di:waypoint x="585" y="141" /><di:waypoint x="585" y="134" /><di:waypoint x="600" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_accouchement_voie_basse" bpmnElement="Flux_4_accouchement_voie_basse"><di:waypoint x="582" y="184" /><di:waypoint x="591" y="184" /><di:waypoint x="591" y="361" /><di:waypoint x="600" y="361" /><bpmndi:BPMNLabel><dc:Bounds x="576" y="149" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_accouchement_voie_basse" bpmnElement="Flux_5_accouchement_voie_basse"><di:waypoint x="750" y="361" /><di:waypoint x="1125" y="361" /><di:waypoint x="1125" y="354" /><di:waypoint x="1500" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_accouchement_voie_basse" bpmnElement="Flux_6_accouchement_voie_basse"><di:waypoint x="636" y="134" /><di:waypoint x="708" y="134" /><di:waypoint x="708" y="140" /><di:waypoint x="780" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_accouchement_voie_basse" bpmnElement="Flux_7_accouchement_voie_basse"><di:waypoint x="920" y="140" /><di:waypoint x="940" y="140" /><di:waypoint x="940" y="353" /><di:waypoint x="960" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_accouchement_voie_basse" bpmnElement="Flux_8_accouchement_voie_basse"><di:waypoint x="1010" y="353" /><di:waypoint x="1075" y="353" /><di:waypoint x="1075" y="360" /><di:waypoint x="1140" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_accouchement_voie_basse" bpmnElement="Flux_9_accouchement_voie_basse"><di:waypoint x="1010" y="353" /><di:waypoint x="1075" y="353" /><di:waypoint x="1075" y="581" /><di:waypoint x="1140" y="581" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_accouchement_voie_basse" bpmnElement="Flux_10_accouchement_voie_basse"><di:waypoint x="1280" y="360" /><di:waypoint x="1300" y="360" /><di:waypoint x="1300" y="353" /><di:waypoint x="1320" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_accouchement_voie_basse" bpmnElement="Flux_11_accouchement_voie_basse"><di:waypoint x="1290" y="581" /><di:waypoint x="1305" y="581" /><di:waypoint x="1305" y="353" /><di:waypoint x="1320" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_accouchement_voie_basse" bpmnElement="Flux_12_accouchement_voie_basse"><di:waypoint x="1370" y="353" /><di:waypoint x="1500" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_partogramme_accouchement_voie_basse" bpmnElement="Association_partogramme_accouchement_voie_basse"><di:waypoint x="568" y="216" /><di:waypoint x="495" y="184" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_registre_accouchement_voie_basse" bpmnElement="Association_registre_accouchement_voie_basse"><di:waypoint x="918" y="213" /><di:waypoint x="850" y="177" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

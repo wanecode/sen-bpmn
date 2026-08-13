@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_demande_imagerie_medicale" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_demande_imagerie_medicale" name="Message métier" />
+  <bpmn:error id="Erreur_demande_imagerie_medicale" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_demande_imagerie_medicale" name="Demande d’imagerie médicale" isExecutable="false">
+    <bpmn:documentation>Planifier l’examen, vérifier les contre-indications et transmettre un compte rendu interprété. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_demande_imagerie_medicale">
+      <bpmn:lane id="Couloir_1_demande_imagerie_medicale" name="Médecin prescripteur">
+        <bpmn:flowNodeRef>debut_demande_imagerie_medicale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>adapter_demande_imagerie_medicale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>alerte_demande_imagerie_medicale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_demande_imagerie_medicale</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_demande_imagerie_medicale" name="Manipulateur d’imagerie">
+        <bpmn:flowNodeRef>precautions_demande_imagerie_medicale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>contreindication_demande_imagerie_medicale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>planifier_demande_imagerie_medicale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>realiser_demande_imagerie_medicale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>panne_demande_imagerie_medicale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>reprogrammer_demande_imagerie_medicale</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_demande_imagerie_medicale" name="Radiologue">
+        <bpmn:flowNodeRef>pertinence_demande_imagerie_medicale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>interpreter_demande_imagerie_medicale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>urgent_demande_imagerie_medicale</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_demande_imagerie_medicale" name="Demande d’imagerie reçue">
+      <bpmn:outgoing>Flux_1_demande_imagerie_medicale</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="pertinence_demande_imagerie_medicale" name="Vérifier indication et urgence">
+      <bpmn:incoming>Flux_1_demande_imagerie_medicale</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_demande_imagerie_medicale</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="precautions_demande_imagerie_medicale" name="Vérifier identité et contre-indications">
+      <bpmn:incoming>Flux_2_demande_imagerie_medicale</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_demande_imagerie_medicale</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_precautions_demande_imagerie_medicale"><bpmn:outgoing>Flux_interne_1_precautions_demande_imagerie_medicale</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_precautions_demande_imagerie_medicale" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_precautions_demande_imagerie_medicale</bpmn:incoming><bpmn:outgoing>Flux_interne_2_precautions_demande_imagerie_medicale</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_precautions_demande_imagerie_medicale"><bpmn:incoming>Flux_interne_2_precautions_demande_imagerie_medicale</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_precautions_demande_imagerie_medicale" sourceRef="Debut_interne_precautions_demande_imagerie_medicale" targetRef="Etapes_internes_precautions_demande_imagerie_medicale" />
+      <bpmn:sequenceFlow id="Flux_interne_2_precautions_demande_imagerie_medicale" sourceRef="Etapes_internes_precautions_demande_imagerie_medicale" targetRef="Fin_interne_precautions_demande_imagerie_medicale" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="contreindication_demande_imagerie_medicale" name="Contre-indication détectée" attachedToRef="precautions_demande_imagerie_medicale" cancelActivity="true">
+      <bpmn:outgoing>Flux_4_demande_imagerie_medicale</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_contreindication_demande_imagerie_medicale" errorRef="Erreur_demande_imagerie_medicale" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="adapter_demande_imagerie_medicale" name="Contacter le prescripteur et adapter">
+      <bpmn:incoming>Flux_4_demande_imagerie_medicale</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_demande_imagerie_medicale</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="planifier_demande_imagerie_medicale" name="Planifier et préparer l’examen">
+      <bpmn:incoming>Flux_3_demande_imagerie_medicale</bpmn:incoming>
+      <bpmn:incoming>Flux_5_demande_imagerie_medicale</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_demande_imagerie_medicale</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:manualTask id="realiser_demande_imagerie_medicale" name="Acquérir les images">
+      <bpmn:incoming>Flux_6_demande_imagerie_medicale</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_demande_imagerie_medicale</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:boundaryEvent id="panne_demande_imagerie_medicale" name="Panne ou examen interrompu" attachedToRef="realiser_demande_imagerie_medicale" cancelActivity="true">
+      <bpmn:outgoing>Flux_7_demande_imagerie_medicale</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_panne_demande_imagerie_medicale" errorRef="Erreur_demande_imagerie_medicale" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="reprogrammer_demande_imagerie_medicale" name="Sécuriser et reprogrammer">
+      <bpmn:incoming>Flux_7_demande_imagerie_medicale</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_demande_imagerie_medicale</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="interpreter_demande_imagerie_medicale" name="Interpréter et valider le compte rendu">
+      <bpmn:incoming>Flux_9_demande_imagerie_medicale</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_demande_imagerie_medicale</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_interpreter_demande_imagerie_medicale"><bpmn:outgoing>Flux_interne_1_interpreter_demande_imagerie_medicale</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_interpreter_demande_imagerie_medicale" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_interpreter_demande_imagerie_medicale</bpmn:incoming><bpmn:outgoing>Flux_interne_2_interpreter_demande_imagerie_medicale</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_interpreter_demande_imagerie_medicale"><bpmn:incoming>Flux_interne_2_interpreter_demande_imagerie_medicale</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_interpreter_demande_imagerie_medicale" sourceRef="Debut_interne_interpreter_demande_imagerie_medicale" targetRef="Etapes_internes_interpreter_demande_imagerie_medicale" />
+      <bpmn:sequenceFlow id="Flux_interne_2_interpreter_demande_imagerie_medicale" sourceRef="Etapes_internes_interpreter_demande_imagerie_medicale" targetRef="Fin_interne_interpreter_demande_imagerie_medicale" />
+    </bpmn:subProcess>
+    <bpmn:exclusiveGateway id="urgent_demande_imagerie_medicale" name="Anomalie urgente ?">
+      <bpmn:incoming>Flux_10_demande_imagerie_medicale</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_demande_imagerie_medicale</bpmn:outgoing>
+      <bpmn:outgoing>Flux_12_demande_imagerie_medicale</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="alerte_demande_imagerie_medicale" name="Prescripteur alerté">
+      <bpmn:incoming>Flux_11_demande_imagerie_medicale</bpmn:incoming>
+      <bpmn:outgoing>Flux_13_demande_imagerie_medicale</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_alerte_demande_imagerie_medicale" messageRef="Message_demande_imagerie_medicale" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="fin_demande_imagerie_medicale" name="Résultat disponible">
+      <bpmn:incoming>Flux_8_demande_imagerie_medicale</bpmn:incoming>
+      <bpmn:incoming>Flux_12_demande_imagerie_medicale</bpmn:incoming>
+      <bpmn:incoming>Flux_13_demande_imagerie_medicale</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_demande_imagerie_medicale" sourceRef="debut_demande_imagerie_medicale" targetRef="pertinence_demande_imagerie_medicale" />
+    <bpmn:sequenceFlow id="Flux_2_demande_imagerie_medicale" sourceRef="pertinence_demande_imagerie_medicale" targetRef="precautions_demande_imagerie_medicale" />
+    <bpmn:sequenceFlow id="Flux_3_demande_imagerie_medicale" sourceRef="precautions_demande_imagerie_medicale" targetRef="planifier_demande_imagerie_medicale" />
+    <bpmn:sequenceFlow id="Flux_4_demande_imagerie_medicale" name="Exception" sourceRef="contreindication_demande_imagerie_medicale" targetRef="adapter_demande_imagerie_medicale" />
+    <bpmn:sequenceFlow id="Flux_5_demande_imagerie_medicale" sourceRef="adapter_demande_imagerie_medicale" targetRef="planifier_demande_imagerie_medicale" />
+    <bpmn:sequenceFlow id="Flux_6_demande_imagerie_medicale" sourceRef="planifier_demande_imagerie_medicale" targetRef="realiser_demande_imagerie_medicale" />
+    <bpmn:sequenceFlow id="Flux_7_demande_imagerie_medicale" name="Exception" sourceRef="panne_demande_imagerie_medicale" targetRef="reprogrammer_demande_imagerie_medicale" />
+    <bpmn:sequenceFlow id="Flux_8_demande_imagerie_medicale" sourceRef="reprogrammer_demande_imagerie_medicale" targetRef="fin_demande_imagerie_medicale" />
+    <bpmn:sequenceFlow id="Flux_9_demande_imagerie_medicale" sourceRef="realiser_demande_imagerie_medicale" targetRef="interpreter_demande_imagerie_medicale" />
+    <bpmn:sequenceFlow id="Flux_10_demande_imagerie_medicale" sourceRef="interpreter_demande_imagerie_medicale" targetRef="urgent_demande_imagerie_medicale" />
+    <bpmn:sequenceFlow id="Flux_11_demande_imagerie_medicale" name="Oui" sourceRef="urgent_demande_imagerie_medicale" targetRef="alerte_demande_imagerie_medicale" />
+    <bpmn:sequenceFlow id="Flux_12_demande_imagerie_medicale" name="Non" sourceRef="urgent_demande_imagerie_medicale" targetRef="fin_demande_imagerie_medicale" />
+    <bpmn:sequenceFlow id="Flux_13_demande_imagerie_medicale" sourceRef="alerte_demande_imagerie_medicale" targetRef="fin_demande_imagerie_medicale" />
+    <bpmn:dataObject id="Objet_demande_imagerie_demande_imagerie_medicale" />
+    <bpmn:dataObjectReference id="Document_demande_imagerie_demande_imagerie_medicale" name="Demande d’imagerie" dataObjectRef="Objet_demande_imagerie_demande_imagerie_medicale" />
+    <bpmn:association id="Association_demande_imagerie_demande_imagerie_medicale" sourceRef="Document_demande_imagerie_demande_imagerie_medicale" targetRef="pertinence_demande_imagerie_medicale" associationDirection="One" />
+    <bpmn:dataObject id="Objet_cr_imagerie_demande_imagerie_medicale" />
+    <bpmn:dataObjectReference id="Document_cr_imagerie_demande_imagerie_medicale" name="Compte rendu d’imagerie" dataObjectRef="Objet_cr_imagerie_demande_imagerie_medicale" />
+    <bpmn:association id="Association_cr_imagerie_demande_imagerie_medicale" sourceRef="Document_cr_imagerie_demande_imagerie_medicale" targetRef="interpreter_demande_imagerie_medicale" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_demande_imagerie_medicale">
+    <bpmndi:BPMNPlane id="Plan_demande_imagerie_medicale" bpmnElement="Processus_demande_imagerie_medicale">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_demande_imagerie_medicale" bpmnElement="Couloir_1_demande_imagerie_medicale" isHorizontal="true"><dc:Bounds x="20" y="30" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_demande_imagerie_medicale" bpmnElement="Couloir_2_demande_imagerie_medicale" isHorizontal="true"><dc:Bounds x="20" y="250" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_demande_imagerie_medicale" bpmnElement="Couloir_3_demande_imagerie_medicale" isHorizontal="true"><dc:Bounds x="20" y="470" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_demande_imagerie_medicale" bpmnElement="debut_demande_imagerie_medicale"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_pertinence_demande_imagerie_medicale" bpmnElement="pertinence_demande_imagerie_medicale"><dc:Bounds x="240" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_precautions_demande_imagerie_medicale" bpmnElement="precautions_demande_imagerie_medicale" isExpanded="false"><dc:Bounds x="420" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_contreindication_demande_imagerie_medicale" bpmnElement="contreindication_demande_imagerie_medicale"><dc:Bounds x="552" y="389" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_adapter_demande_imagerie_medicale" bpmnElement="adapter_demande_imagerie_medicale"><dc:Bounds x="600" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_planifier_demande_imagerie_medicale" bpmnElement="planifier_demande_imagerie_medicale"><dc:Bounds x="780" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_realiser_demande_imagerie_medicale" bpmnElement="realiser_demande_imagerie_medicale"><dc:Bounds x="960" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_panne_demande_imagerie_medicale" bpmnElement="panne_demande_imagerie_medicale"><dc:Bounds x="1082" y="382" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_reprogrammer_demande_imagerie_medicale" bpmnElement="reprogrammer_demande_imagerie_medicale"><dc:Bounds x="1140" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_interpreter_demande_imagerie_medicale" bpmnElement="interpreter_demande_imagerie_medicale" isExpanded="false"><dc:Bounds x="1140" y="538" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_urgent_demande_imagerie_medicale" bpmnElement="urgent_demande_imagerie_medicale" isMarkerVisible="true"><dc:Bounds x="1320" y="548" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_alerte_demande_imagerie_medicale" bpmnElement="alerte_demande_imagerie_medicale"><dc:Bounds x="1500" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_demande_imagerie_medicale" bpmnElement="fin_demande_imagerie_medicale"><dc:Bounds x="1680" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_demande_imagerie_demande_imagerie_medicale" bpmnElement="Document_demande_imagerie_demande_imagerie_medicale"><dc:Bounds x="360" y="629" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_cr_imagerie_demande_imagerie_medicale" bpmnElement="Document_cr_imagerie_demande_imagerie_medicale"><dc:Bounds x="1270" y="632" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_demande_imagerie_medicale" bpmnElement="Flux_1_demande_imagerie_medicale"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="580" /><di:waypoint x="240" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_demande_imagerie_medicale" bpmnElement="Flux_2_demande_imagerie_medicale"><di:waypoint x="380" y="580" /><di:waypoint x="400" y="580" /><di:waypoint x="400" y="361" /><di:waypoint x="420" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_demande_imagerie_medicale" bpmnElement="Flux_3_demande_imagerie_medicale"><di:waypoint x="570" y="361" /><di:waypoint x="780" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_demande_imagerie_medicale" bpmnElement="Flux_4_demande_imagerie_medicale"><di:waypoint x="582" y="404" /><di:waypoint x="591" y="404" /><di:waypoint x="591" y="140" /><di:waypoint x="600" y="140" /><bpmndi:BPMNLabel><dc:Bounds x="576" y="83" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_demande_imagerie_medicale" bpmnElement="Flux_5_demande_imagerie_medicale"><di:waypoint x="740" y="140" /><di:waypoint x="760" y="140" /><di:waypoint x="760" y="360" /><di:waypoint x="780" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_demande_imagerie_medicale" bpmnElement="Flux_6_demande_imagerie_medicale"><di:waypoint x="920" y="360" /><di:waypoint x="960" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_demande_imagerie_medicale" bpmnElement="Flux_7_demande_imagerie_medicale"><di:waypoint x="1112" y="397" /><di:waypoint x="1126" y="397" /><di:waypoint x="1126" y="360" /><di:waypoint x="1140" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="1111" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_demande_imagerie_medicale" bpmnElement="Flux_8_demande_imagerie_medicale"><di:waypoint x="1280" y="360" /><di:waypoint x="1480" y="360" /><di:waypoint x="1480" y="134" /><di:waypoint x="1680" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_demande_imagerie_medicale" bpmnElement="Flux_9_demande_imagerie_medicale"><di:waypoint x="1100" y="360" /><di:waypoint x="1120" y="360" /><di:waypoint x="1120" y="581" /><di:waypoint x="1140" y="581" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_demande_imagerie_medicale" bpmnElement="Flux_10_demande_imagerie_medicale"><di:waypoint x="1290" y="581" /><di:waypoint x="1305" y="581" /><di:waypoint x="1305" y="573" /><di:waypoint x="1320" y="573" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_demande_imagerie_medicale" bpmnElement="Flux_11_demande_imagerie_medicale"><di:waypoint x="1370" y="573" /><di:waypoint x="1435" y="573" /><di:waypoint x="1435" y="134" /><di:waypoint x="1500" y="134" /><bpmndi:BPMNLabel><dc:Bounds x="1410" y="96" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_demande_imagerie_medicale" bpmnElement="Flux_12_demande_imagerie_medicale"><di:waypoint x="1370" y="573" /><di:waypoint x="1525" y="573" /><di:waypoint x="1525" y="134" /><di:waypoint x="1680" y="134" /><bpmndi:BPMNLabel><dc:Bounds x="1500" y="96" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_13_demande_imagerie_medicale" bpmnElement="Flux_13_demande_imagerie_medicale"><di:waypoint x="1536" y="134" /><di:waypoint x="1680" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_demande_imagerie_demande_imagerie_medicale" bpmnElement="Association_demande_imagerie_demande_imagerie_medicale"><di:waypoint x="378" y="653" /><di:waypoint x="310" y="617" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_cr_imagerie_demande_imagerie_medicale" bpmnElement="Association_cr_imagerie_demande_imagerie_medicale"><di:waypoint x="1288" y="656" /><di:waypoint x="1215" y="624" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

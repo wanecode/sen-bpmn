@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_prise_en_charge_urgence_vitale" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_prise_en_charge_urgence_vitale" name="Message métier" />
+  <bpmn:error id="Erreur_prise_en_charge_urgence_vitale" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_prise_en_charge_urgence_vitale" name="Prise en charge d’une urgence vitale" isExecutable="false">
+    <bpmn:documentation>Coordonner l’alerte, la stabilisation initiale et la décision d’orientation d’un patient en détresse vitale. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_prise_en_charge_urgence_vitale">
+      <bpmn:lane id="Couloir_1_prise_en_charge_urgence_vitale" name="Infirmier d’urgence">
+        <bpmn:flowNodeRef>debut_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>alerter_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_prise_en_charge_urgence_vitale" name="Équipe de réanimation">
+        <bpmn:flowNodeRef>equipe_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>evaluer_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>securiser_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>merge_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>stabiliser_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>retard_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>decision_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_prise_en_charge_urgence_vitale" name="Spécialiste ou unité d’aval">
+        <bpmn:flowNodeRef>renfort_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>orienter_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_prise_en_charge_urgence_vitale</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_prise_en_charge_urgence_vitale" name="Détresse vitale reconnue">
+      <bpmn:outgoing>Flux_1_prise_en_charge_urgence_vitale</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="alerter_prise_en_charge_urgence_vitale" name="Diffuser l’alerte vitale">
+      <bpmn:incoming>Flux_1_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_prise_en_charge_urgence_vitale</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="equipe_prise_en_charge_urgence_vitale" name="Équipe réunie">
+      <bpmn:incoming>Flux_2_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_prise_en_charge_urgence_vitale</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_equipe_prise_en_charge_urgence_vitale" messageRef="Message_prise_en_charge_urgence_vitale" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:parallelGateway id="split_prise_en_charge_urgence_vitale" name="Actions simultanées">
+      <bpmn:incoming>Flux_3_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:outgoing>Flux_4_prise_en_charge_urgence_vitale</bpmn:outgoing>
+      <bpmn:outgoing>Flux_5_prise_en_charge_urgence_vitale</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="evaluer_prise_en_charge_urgence_vitale" name="Évaluer les fonctions vitales">
+      <bpmn:incoming>Flux_4_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_prise_en_charge_urgence_vitale</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:manualTask id="securiser_prise_en_charge_urgence_vitale" name="Sécuriser voies aériennes et circulation">
+      <bpmn:incoming>Flux_5_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_prise_en_charge_urgence_vitale</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:parallelGateway id="merge_prise_en_charge_urgence_vitale" name="Stabilisation initiale">
+      <bpmn:incoming>Flux_6_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:incoming>Flux_7_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_prise_en_charge_urgence_vitale</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:subProcess id="stabiliser_prise_en_charge_urgence_vitale" name="Réaliser la réanimation initiale">
+      <bpmn:incoming>Flux_8_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_prise_en_charge_urgence_vitale</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_stabiliser_prise_en_charge_urgence_vitale"><bpmn:outgoing>Flux_interne_1_stabiliser_prise_en_charge_urgence_vitale</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_stabiliser_prise_en_charge_urgence_vitale" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_stabiliser_prise_en_charge_urgence_vitale</bpmn:incoming><bpmn:outgoing>Flux_interne_2_stabiliser_prise_en_charge_urgence_vitale</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_stabiliser_prise_en_charge_urgence_vitale"><bpmn:incoming>Flux_interne_2_stabiliser_prise_en_charge_urgence_vitale</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_stabiliser_prise_en_charge_urgence_vitale" sourceRef="Debut_interne_stabiliser_prise_en_charge_urgence_vitale" targetRef="Etapes_internes_stabiliser_prise_en_charge_urgence_vitale" />
+      <bpmn:sequenceFlow id="Flux_interne_2_stabiliser_prise_en_charge_urgence_vitale" sourceRef="Etapes_internes_stabiliser_prise_en_charge_urgence_vitale" targetRef="Fin_interne_stabiliser_prise_en_charge_urgence_vitale" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="retard_prise_en_charge_urgence_vitale" name="Réponse insuffisante" attachedToRef="stabiliser_prise_en_charge_urgence_vitale" cancelActivity="true">
+      <bpmn:outgoing>Flux_10_prise_en_charge_urgence_vitale</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="Definition_temps_retard_prise_en_charge_urgence_vitale" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="renfort_prise_en_charge_urgence_vitale" name="Appeler un renfort spécialisé">
+      <bpmn:incoming>Flux_10_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:incoming>Flux_13_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_prise_en_charge_urgence_vitale</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="decision_prise_en_charge_urgence_vitale" name="Patient stabilisé ?">
+      <bpmn:incoming>Flux_9_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:incoming>Flux_11_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_prise_en_charge_urgence_vitale</bpmn:outgoing>
+      <bpmn:outgoing>Flux_13_prise_en_charge_urgence_vitale</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="orienter_prise_en_charge_urgence_vitale" name="Organiser l’orientation spécialisée">
+      <bpmn:incoming>Flux_12_prise_en_charge_urgence_vitale</bpmn:incoming>
+      <bpmn:outgoing>Flux_14_prise_en_charge_urgence_vitale</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="fin_prise_en_charge_urgence_vitale" name="Relais sécurisé">
+      <bpmn:incoming>Flux_14_prise_en_charge_urgence_vitale</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_prise_en_charge_urgence_vitale" sourceRef="debut_prise_en_charge_urgence_vitale" targetRef="alerter_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_2_prise_en_charge_urgence_vitale" sourceRef="alerter_prise_en_charge_urgence_vitale" targetRef="equipe_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_3_prise_en_charge_urgence_vitale" sourceRef="equipe_prise_en_charge_urgence_vitale" targetRef="split_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_4_prise_en_charge_urgence_vitale" sourceRef="split_prise_en_charge_urgence_vitale" targetRef="evaluer_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_5_prise_en_charge_urgence_vitale" sourceRef="split_prise_en_charge_urgence_vitale" targetRef="securiser_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_6_prise_en_charge_urgence_vitale" sourceRef="evaluer_prise_en_charge_urgence_vitale" targetRef="merge_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_7_prise_en_charge_urgence_vitale" sourceRef="securiser_prise_en_charge_urgence_vitale" targetRef="merge_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_8_prise_en_charge_urgence_vitale" sourceRef="merge_prise_en_charge_urgence_vitale" targetRef="stabiliser_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_9_prise_en_charge_urgence_vitale" sourceRef="stabiliser_prise_en_charge_urgence_vitale" targetRef="decision_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_10_prise_en_charge_urgence_vitale" name="Escalade" sourceRef="retard_prise_en_charge_urgence_vitale" targetRef="renfort_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_11_prise_en_charge_urgence_vitale" sourceRef="renfort_prise_en_charge_urgence_vitale" targetRef="decision_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_12_prise_en_charge_urgence_vitale" name="Oui" sourceRef="decision_prise_en_charge_urgence_vitale" targetRef="orienter_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_13_prise_en_charge_urgence_vitale" name="Non" sourceRef="decision_prise_en_charge_urgence_vitale" targetRef="renfort_prise_en_charge_urgence_vitale" />
+    <bpmn:sequenceFlow id="Flux_14_prise_en_charge_urgence_vitale" sourceRef="orienter_prise_en_charge_urgence_vitale" targetRef="fin_prise_en_charge_urgence_vitale" />
+    <bpmn:dataObject id="Objet_checklist_prise_en_charge_urgence_vitale" />
+    <bpmn:dataObjectReference id="Document_checklist_prise_en_charge_urgence_vitale" name="Checklist de soins d’urgence" dataObjectRef="Objet_checklist_prise_en_charge_urgence_vitale" />
+    <bpmn:association id="Association_checklist_prise_en_charge_urgence_vitale" sourceRef="Document_checklist_prise_en_charge_urgence_vitale" targetRef="stabiliser_prise_en_charge_urgence_vitale" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_prise_en_charge_urgence_vitale">
+    <bpmndi:BPMNPlane id="Plan_prise_en_charge_urgence_vitale" bpmnElement="Processus_prise_en_charge_urgence_vitale">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_prise_en_charge_urgence_vitale" bpmnElement="Couloir_1_prise_en_charge_urgence_vitale" isHorizontal="true"><dc:Bounds x="20" y="30" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_prise_en_charge_urgence_vitale" bpmnElement="Couloir_2_prise_en_charge_urgence_vitale" isHorizontal="true"><dc:Bounds x="20" y="250" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_prise_en_charge_urgence_vitale" bpmnElement="Couloir_3_prise_en_charge_urgence_vitale" isHorizontal="true"><dc:Bounds x="20" y="470" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_prise_en_charge_urgence_vitale" bpmnElement="debut_prise_en_charge_urgence_vitale"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_alerter_prise_en_charge_urgence_vitale" bpmnElement="alerter_prise_en_charge_urgence_vitale"><dc:Bounds x="240" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_equipe_prise_en_charge_urgence_vitale" bpmnElement="equipe_prise_en_charge_urgence_vitale"><dc:Bounds x="420" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_split_prise_en_charge_urgence_vitale" bpmnElement="split_prise_en_charge_urgence_vitale" isMarkerVisible="true"><dc:Bounds x="600" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_evaluer_prise_en_charge_urgence_vitale" bpmnElement="evaluer_prise_en_charge_urgence_vitale"><dc:Bounds x="780" y="275" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_securiser_prise_en_charge_urgence_vitale" bpmnElement="securiser_prise_en_charge_urgence_vitale"><dc:Bounds x="780" y="375" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_merge_prise_en_charge_urgence_vitale" bpmnElement="merge_prise_en_charge_urgence_vitale" isMarkerVisible="true"><dc:Bounds x="960" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_stabiliser_prise_en_charge_urgence_vitale" bpmnElement="stabiliser_prise_en_charge_urgence_vitale" isExpanded="false"><dc:Bounds x="1140" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_retard_prise_en_charge_urgence_vitale" bpmnElement="retard_prise_en_charge_urgence_vitale"><dc:Bounds x="1272" y="389" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_renfort_prise_en_charge_urgence_vitale" bpmnElement="renfort_prise_en_charge_urgence_vitale"><dc:Bounds x="1320" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_decision_prise_en_charge_urgence_vitale" bpmnElement="decision_prise_en_charge_urgence_vitale" isMarkerVisible="true"><dc:Bounds x="1320" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_orienter_prise_en_charge_urgence_vitale" bpmnElement="orienter_prise_en_charge_urgence_vitale"><dc:Bounds x="1500" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_prise_en_charge_urgence_vitale" bpmnElement="fin_prise_en_charge_urgence_vitale"><dc:Bounds x="1680" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_checklist_prise_en_charge_urgence_vitale" bpmnElement="Document_checklist_prise_en_charge_urgence_vitale"><dc:Bounds x="1270" y="412" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_prise_en_charge_urgence_vitale" bpmnElement="Flux_1_prise_en_charge_urgence_vitale"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="140" /><di:waypoint x="240" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_prise_en_charge_urgence_vitale" bpmnElement="Flux_2_prise_en_charge_urgence_vitale"><di:waypoint x="380" y="140" /><di:waypoint x="400" y="140" /><di:waypoint x="400" y="354" /><di:waypoint x="420" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_prise_en_charge_urgence_vitale" bpmnElement="Flux_3_prise_en_charge_urgence_vitale"><di:waypoint x="456" y="354" /><di:waypoint x="600" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_prise_en_charge_urgence_vitale" bpmnElement="Flux_4_prise_en_charge_urgence_vitale"><di:waypoint x="650" y="353" /><di:waypoint x="715" y="353" /><di:waypoint x="715" y="312" /><di:waypoint x="780" y="312" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_prise_en_charge_urgence_vitale" bpmnElement="Flux_5_prise_en_charge_urgence_vitale"><di:waypoint x="650" y="353" /><di:waypoint x="715" y="353" /><di:waypoint x="715" y="412" /><di:waypoint x="780" y="412" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_prise_en_charge_urgence_vitale" bpmnElement="Flux_6_prise_en_charge_urgence_vitale"><di:waypoint x="920" y="312" /><di:waypoint x="940" y="312" /><di:waypoint x="940" y="353" /><di:waypoint x="960" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_prise_en_charge_urgence_vitale" bpmnElement="Flux_7_prise_en_charge_urgence_vitale"><di:waypoint x="920" y="412" /><di:waypoint x="940" y="412" /><di:waypoint x="940" y="353" /><di:waypoint x="960" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_prise_en_charge_urgence_vitale" bpmnElement="Flux_8_prise_en_charge_urgence_vitale"><di:waypoint x="1010" y="353" /><di:waypoint x="1075" y="353" /><di:waypoint x="1075" y="361" /><di:waypoint x="1140" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_prise_en_charge_urgence_vitale" bpmnElement="Flux_9_prise_en_charge_urgence_vitale"><di:waypoint x="1290" y="361" /><di:waypoint x="1305" y="361" /><di:waypoint x="1305" y="353" /><di:waypoint x="1320" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_prise_en_charge_urgence_vitale" bpmnElement="Flux_10_prise_en_charge_urgence_vitale"><di:waypoint x="1302" y="404" /><di:waypoint x="1311" y="404" /><di:waypoint x="1311" y="580" /><di:waypoint x="1320" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="1296" y="369" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_prise_en_charge_urgence_vitale" bpmnElement="Flux_11_prise_en_charge_urgence_vitale"><di:waypoint x="1460" y="580" /><di:waypoint x="1488" y="580" /><di:waypoint x="1488" y="651" /><di:waypoint x="1292" y="651" /><di:waypoint x="1292" y="353" /><di:waypoint x="1320" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_prise_en_charge_urgence_vitale" bpmnElement="Flux_12_prise_en_charge_urgence_vitale"><di:waypoint x="1370" y="353" /><di:waypoint x="1435" y="353" /><di:waypoint x="1435" y="580" /><di:waypoint x="1500" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="1410" y="308" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_13_prise_en_charge_urgence_vitale" bpmnElement="Flux_13_prise_en_charge_urgence_vitale"><di:waypoint x="1370" y="353" /><di:waypoint x="1398" y="353" /><di:waypoint x="1398" y="651" /><di:waypoint x="1292" y="651" /><di:waypoint x="1292" y="580" /><di:waypoint x="1320" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="1320" y="308" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_14_prise_en_charge_urgence_vitale" bpmnElement="Flux_14_prise_en_charge_urgence_vitale"><di:waypoint x="1640" y="580" /><di:waypoint x="1660" y="580" /><di:waypoint x="1660" y="574" /><di:waypoint x="1680" y="574" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_checklist_prise_en_charge_urgence_vitale" bpmnElement="Association_checklist_prise_en_charge_urgence_vitale"><di:waypoint x="1288" y="436" /><di:waypoint x="1215" y="404" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_dispensation_medicaments" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_dispensation_medicaments" name="Message métier" />
+  <bpmn:error id="Erreur_dispensation_medicaments" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_dispensation_medicaments" name="Dispensation des médicaments" isExecutable="false">
+    <bpmn:documentation>Analyser l’ordonnance, préparer les produits et délivrer avec les conseils d’usage appropriés. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_dispensation_medicaments">
+      <bpmn:lane id="Couloir_1_dispensation_medicaments" name="Accueil pharmacie">
+        <bpmn:flowNodeRef>debut_dispensation_medicaments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>identifier_dispensation_medicaments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>rupture_dispensation_medicaments</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_dispensation_medicaments" name="Pharmacien / préparateur">
+        <bpmn:flowNodeRef>analyser_dispensation_medicaments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>anomalie_dispensation_medicaments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>contacter_dispensation_medicaments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>stock_dispensation_medicaments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>disponible_dispensation_medicaments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>preparer_dispensation_medicaments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>tracer_dispensation_medicaments</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_dispensation_medicaments" name="Patient ou unité de soins">
+        <bpmn:flowNodeRef>conseiller_dispensation_medicaments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_dispensation_medicaments</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_dispensation_medicaments" name="Ordonnance présentée">
+      <bpmn:outgoing>Flux_1_dispensation_medicaments</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="identifier_dispensation_medicaments" name="Identifier patient et ordonnance">
+      <bpmn:incoming>Flux_1_dispensation_medicaments</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_dispensation_medicaments</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="analyser_dispensation_medicaments" name="Analyser indication, dose et interactions">
+      <bpmn:incoming>Flux_2_dispensation_medicaments</bpmn:incoming>
+      <bpmn:incoming>Flux_5_dispensation_medicaments</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_dispensation_medicaments</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_analyser_dispensation_medicaments"><bpmn:outgoing>Flux_interne_1_analyser_dispensation_medicaments</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_analyser_dispensation_medicaments" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_analyser_dispensation_medicaments</bpmn:incoming><bpmn:outgoing>Flux_interne_2_analyser_dispensation_medicaments</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_analyser_dispensation_medicaments"><bpmn:incoming>Flux_interne_2_analyser_dispensation_medicaments</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_analyser_dispensation_medicaments" sourceRef="Debut_interne_analyser_dispensation_medicaments" targetRef="Etapes_internes_analyser_dispensation_medicaments" />
+      <bpmn:sequenceFlow id="Flux_interne_2_analyser_dispensation_medicaments" sourceRef="Etapes_internes_analyser_dispensation_medicaments" targetRef="Fin_interne_analyser_dispensation_medicaments" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="anomalie_dispensation_medicaments" name="Anomalie de prescription" attachedToRef="analyser_dispensation_medicaments" cancelActivity="true">
+      <bpmn:outgoing>Flux_4_dispensation_medicaments</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_anomalie_dispensation_medicaments" errorRef="Erreur_dispensation_medicaments" />
+    </bpmn:boundaryEvent>
+    <bpmn:intermediateCatchEvent id="contacter_dispensation_medicaments" name="Échange avec le prescripteur">
+      <bpmn:incoming>Flux_4_dispensation_medicaments</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_dispensation_medicaments</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_contacter_dispensation_medicaments" messageRef="Message_dispensation_medicaments" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="stock_dispensation_medicaments" name="Vérifier disponibilité et lot">
+      <bpmn:incoming>Flux_3_dispensation_medicaments</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_dispensation_medicaments</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="disponible_dispensation_medicaments" name="Produit disponible ?">
+      <bpmn:incoming>Flux_6_dispensation_medicaments</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_dispensation_medicaments</bpmn:outgoing>
+      <bpmn:outgoing>Flux_8_dispensation_medicaments</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:manualTask id="preparer_dispensation_medicaments" name="Préparer et contrôler la délivrance">
+      <bpmn:incoming>Flux_7_dispensation_medicaments</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_dispensation_medicaments</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:userTask id="rupture_dispensation_medicaments" name="Proposer alternative ou reliquat">
+      <bpmn:incoming>Flux_8_dispensation_medicaments</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_dispensation_medicaments</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="conseiller_dispensation_medicaments" name="Délivrer et donner les conseils">
+      <bpmn:incoming>Flux_9_dispensation_medicaments</bpmn:incoming>
+      <bpmn:incoming>Flux_10_dispensation_medicaments</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_dispensation_medicaments</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_conseiller_dispensation_medicaments"><bpmn:outgoing>Flux_interne_1_conseiller_dispensation_medicaments</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_conseiller_dispensation_medicaments" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_conseiller_dispensation_medicaments</bpmn:incoming><bpmn:outgoing>Flux_interne_2_conseiller_dispensation_medicaments</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_conseiller_dispensation_medicaments"><bpmn:incoming>Flux_interne_2_conseiller_dispensation_medicaments</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_conseiller_dispensation_medicaments" sourceRef="Debut_interne_conseiller_dispensation_medicaments" targetRef="Etapes_internes_conseiller_dispensation_medicaments" />
+      <bpmn:sequenceFlow id="Flux_interne_2_conseiller_dispensation_medicaments" sourceRef="Etapes_internes_conseiller_dispensation_medicaments" targetRef="Fin_interne_conseiller_dispensation_medicaments" />
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="tracer_dispensation_medicaments" name="Tracer la dispensation">
+      <bpmn:incoming>Flux_11_dispensation_medicaments</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_dispensation_medicaments</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="fin_dispensation_medicaments" name="Dispensation terminée">
+      <bpmn:incoming>Flux_12_dispensation_medicaments</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_dispensation_medicaments" sourceRef="debut_dispensation_medicaments" targetRef="identifier_dispensation_medicaments" />
+    <bpmn:sequenceFlow id="Flux_2_dispensation_medicaments" sourceRef="identifier_dispensation_medicaments" targetRef="analyser_dispensation_medicaments" />
+    <bpmn:sequenceFlow id="Flux_3_dispensation_medicaments" sourceRef="analyser_dispensation_medicaments" targetRef="stock_dispensation_medicaments" />
+    <bpmn:sequenceFlow id="Flux_4_dispensation_medicaments" name="Exception" sourceRef="anomalie_dispensation_medicaments" targetRef="contacter_dispensation_medicaments" />
+    <bpmn:sequenceFlow id="Flux_5_dispensation_medicaments" sourceRef="contacter_dispensation_medicaments" targetRef="analyser_dispensation_medicaments" />
+    <bpmn:sequenceFlow id="Flux_6_dispensation_medicaments" sourceRef="stock_dispensation_medicaments" targetRef="disponible_dispensation_medicaments" />
+    <bpmn:sequenceFlow id="Flux_7_dispensation_medicaments" name="Oui" sourceRef="disponible_dispensation_medicaments" targetRef="preparer_dispensation_medicaments" />
+    <bpmn:sequenceFlow id="Flux_8_dispensation_medicaments" name="Non" sourceRef="disponible_dispensation_medicaments" targetRef="rupture_dispensation_medicaments" />
+    <bpmn:sequenceFlow id="Flux_9_dispensation_medicaments" sourceRef="rupture_dispensation_medicaments" targetRef="conseiller_dispensation_medicaments" />
+    <bpmn:sequenceFlow id="Flux_10_dispensation_medicaments" sourceRef="preparer_dispensation_medicaments" targetRef="conseiller_dispensation_medicaments" />
+    <bpmn:sequenceFlow id="Flux_11_dispensation_medicaments" sourceRef="conseiller_dispensation_medicaments" targetRef="tracer_dispensation_medicaments" />
+    <bpmn:sequenceFlow id="Flux_12_dispensation_medicaments" sourceRef="tracer_dispensation_medicaments" targetRef="fin_dispensation_medicaments" />
+    <bpmn:dataObject id="Objet_registre_disp_dispensation_medicaments" />
+    <bpmn:dataObjectReference id="Document_registre_disp_dispensation_medicaments" name="Registre de dispensation" dataObjectRef="Objet_registre_disp_dispensation_medicaments" />
+    <bpmn:association id="Association_registre_disp_dispensation_medicaments" sourceRef="Document_registre_disp_dispensation_medicaments" targetRef="tracer_dispensation_medicaments" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_dispensation_medicaments">
+    <bpmndi:BPMNPlane id="Plan_dispensation_medicaments" bpmnElement="Processus_dispensation_medicaments">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_dispensation_medicaments" bpmnElement="Couloir_1_dispensation_medicaments" isHorizontal="true"><dc:Bounds x="20" y="30" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_dispensation_medicaments" bpmnElement="Couloir_2_dispensation_medicaments" isHorizontal="true"><dc:Bounds x="20" y="250" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_dispensation_medicaments" bpmnElement="Couloir_3_dispensation_medicaments" isHorizontal="true"><dc:Bounds x="20" y="470" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_dispensation_medicaments" bpmnElement="debut_dispensation_medicaments"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_identifier_dispensation_medicaments" bpmnElement="identifier_dispensation_medicaments"><dc:Bounds x="240" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_analyser_dispensation_medicaments" bpmnElement="analyser_dispensation_medicaments" isExpanded="false"><dc:Bounds x="420" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_anomalie_dispensation_medicaments" bpmnElement="anomalie_dispensation_medicaments"><dc:Bounds x="552" y="389" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_contacter_dispensation_medicaments" bpmnElement="contacter_dispensation_medicaments"><dc:Bounds x="600" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_stock_dispensation_medicaments" bpmnElement="stock_dispensation_medicaments"><dc:Bounds x="780" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_disponible_dispensation_medicaments" bpmnElement="disponible_dispensation_medicaments" isMarkerVisible="true"><dc:Bounds x="960" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_preparer_dispensation_medicaments" bpmnElement="preparer_dispensation_medicaments"><dc:Bounds x="1140" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_rupture_dispensation_medicaments" bpmnElement="rupture_dispensation_medicaments"><dc:Bounds x="1140" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_conseiller_dispensation_medicaments" bpmnElement="conseiller_dispensation_medicaments" isExpanded="false"><dc:Bounds x="1320" y="538" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_tracer_dispensation_medicaments" bpmnElement="tracer_dispensation_medicaments"><dc:Bounds x="1500" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_dispensation_medicaments" bpmnElement="fin_dispensation_medicaments"><dc:Bounds x="1680" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_registre_disp_dispensation_medicaments" bpmnElement="Document_registre_disp_dispensation_medicaments"><dc:Bounds x="1620" y="409" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_dispensation_medicaments" bpmnElement="Flux_1_dispensation_medicaments"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="140" /><di:waypoint x="240" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_dispensation_medicaments" bpmnElement="Flux_2_dispensation_medicaments"><di:waypoint x="380" y="140" /><di:waypoint x="400" y="140" /><di:waypoint x="400" y="361" /><di:waypoint x="420" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_dispensation_medicaments" bpmnElement="Flux_3_dispensation_medicaments"><di:waypoint x="570" y="361" /><di:waypoint x="780" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_dispensation_medicaments" bpmnElement="Flux_4_dispensation_medicaments"><di:waypoint x="582" y="404" /><di:waypoint x="591" y="404" /><di:waypoint x="591" y="354" /><di:waypoint x="600" y="354" /><bpmndi:BPMNLabel><dc:Bounds x="576" y="316" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_dispensation_medicaments" bpmnElement="Flux_5_dispensation_medicaments"><di:waypoint x="636" y="354" /><di:waypoint x="664" y="354" /><di:waypoint x="664" y="438" /><di:waypoint x="392" y="438" /><di:waypoint x="392" y="361" /><di:waypoint x="420" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_dispensation_medicaments" bpmnElement="Flux_6_dispensation_medicaments"><di:waypoint x="920" y="360" /><di:waypoint x="940" y="360" /><di:waypoint x="940" y="353" /><di:waypoint x="960" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_dispensation_medicaments" bpmnElement="Flux_7_dispensation_medicaments"><di:waypoint x="1010" y="353" /><di:waypoint x="1075" y="353" /><di:waypoint x="1075" y="360" /><di:waypoint x="1140" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="1050" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_dispensation_medicaments" bpmnElement="Flux_8_dispensation_medicaments"><di:waypoint x="1010" y="353" /><di:waypoint x="1075" y="353" /><di:waypoint x="1075" y="140" /><di:waypoint x="1140" y="140" /><bpmndi:BPMNLabel><dc:Bounds x="1050" y="83" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_dispensation_medicaments" bpmnElement="Flux_9_dispensation_medicaments"><di:waypoint x="1280" y="140" /><di:waypoint x="1300" y="140" /><di:waypoint x="1300" y="581" /><di:waypoint x="1320" y="581" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_dispensation_medicaments" bpmnElement="Flux_10_dispensation_medicaments"><di:waypoint x="1280" y="360" /><di:waypoint x="1300" y="360" /><di:waypoint x="1300" y="581" /><di:waypoint x="1320" y="581" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_dispensation_medicaments" bpmnElement="Flux_11_dispensation_medicaments"><di:waypoint x="1470" y="581" /><di:waypoint x="1485" y="581" /><di:waypoint x="1485" y="360" /><di:waypoint x="1500" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_dispensation_medicaments" bpmnElement="Flux_12_dispensation_medicaments"><di:waypoint x="1640" y="360" /><di:waypoint x="1660" y="360" /><di:waypoint x="1660" y="574" /><di:waypoint x="1680" y="574" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_registre_disp_dispensation_medicaments" bpmnElement="Association_registre_disp_dispensation_medicaments"><di:waypoint x="1638" y="433" /><di:waypoint x="1570" y="397" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

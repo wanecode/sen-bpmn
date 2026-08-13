@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_gestion_dossier_medical" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_gestion_dossier_medical" name="Message métier" />
+  <bpmn:error id="Erreur_gestion_dossier_medical" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_gestion_dossier_medical" name="Gestion du dossier médical" isExecutable="false">
+    <bpmn:documentation>Créer, alimenter, rendre disponible et archiver le dossier dans le respect de la confidentialité. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_gestion_dossier_medical">
+      <bpmn:lane id="Couloir_1_gestion_dossier_medical" name="Professionnel de santé">
+        <bpmn:flowNodeRef>debut_gestion_dossier_medical</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>classer_gestion_dossier_medical</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>relancer_gestion_dossier_medical</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_gestion_dossier_medical" name="Archives médicales">
+        <bpmn:flowNodeRef>indexer_gestion_dossier_medical</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>erreur_gestion_dossier_medical</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>completude_gestion_dossier_medical</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>complet_gestion_dossier_medical</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>archiver_gestion_dossier_medical</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>demande_gestion_dossier_medical</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_gestion_dossier_medical</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_gestion_dossier_medical" name="Référent confidentialité">
+        <bpmn:flowNodeRef>bloquer_gestion_dossier_medical</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>instruire_gestion_dossier_medical</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_gestion_dossier_medical" name="Document clinique produit">
+      <bpmn:outgoing>Flux_1_gestion_dossier_medical</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="classer_gestion_dossier_medical" name="Identifier et classer la pièce">
+      <bpmn:incoming>Flux_1_gestion_dossier_medical</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_gestion_dossier_medical</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="indexer_gestion_dossier_medical" name="Indexer dans le dossier patient">
+      <bpmn:incoming>Flux_2_gestion_dossier_medical</bpmn:incoming>
+      <bpmn:incoming>Flux_4_gestion_dossier_medical</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_gestion_dossier_medical</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="erreur_gestion_dossier_medical" name="Mauvais dossier suspecté" attachedToRef="indexer_gestion_dossier_medical" cancelActivity="true">
+      <bpmn:outgoing>Flux_3_gestion_dossier_medical</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_erreur_gestion_dossier_medical" errorRef="Erreur_gestion_dossier_medical" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="bloquer_gestion_dossier_medical" name="Bloquer l’accès et corriger l’identité">
+      <bpmn:incoming>Flux_3_gestion_dossier_medical</bpmn:incoming>
+      <bpmn:outgoing>Flux_4_gestion_dossier_medical</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="completude_gestion_dossier_medical" name="Contrôler complétude et signatures">
+      <bpmn:incoming>Flux_5_gestion_dossier_medical</bpmn:incoming>
+      <bpmn:incoming>Flux_8_gestion_dossier_medical</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_gestion_dossier_medical</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_completude_gestion_dossier_medical"><bpmn:outgoing>Flux_interne_1_completude_gestion_dossier_medical</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_completude_gestion_dossier_medical" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_completude_gestion_dossier_medical</bpmn:incoming><bpmn:outgoing>Flux_interne_2_completude_gestion_dossier_medical</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_completude_gestion_dossier_medical"><bpmn:incoming>Flux_interne_2_completude_gestion_dossier_medical</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_completude_gestion_dossier_medical" sourceRef="Debut_interne_completude_gestion_dossier_medical" targetRef="Etapes_internes_completude_gestion_dossier_medical" />
+      <bpmn:sequenceFlow id="Flux_interne_2_completude_gestion_dossier_medical" sourceRef="Etapes_internes_completude_gestion_dossier_medical" targetRef="Fin_interne_completude_gestion_dossier_medical" />
+    </bpmn:subProcess>
+    <bpmn:exclusiveGateway id="complet_gestion_dossier_medical" name="Dossier complet ?">
+      <bpmn:incoming>Flux_6_gestion_dossier_medical</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_gestion_dossier_medical</bpmn:outgoing>
+      <bpmn:outgoing>Flux_9_gestion_dossier_medical</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="relancer_gestion_dossier_medical" name="Demande de pièce envoyée">
+      <bpmn:incoming>Flux_7_gestion_dossier_medical</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_gestion_dossier_medical</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_relancer_gestion_dossier_medical" messageRef="Message_gestion_dossier_medical" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="archiver_gestion_dossier_medical" name="Archiver selon la durée définie">
+      <bpmn:incoming>Flux_9_gestion_dossier_medical</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_gestion_dossier_medical</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="demande_gestion_dossier_medical" name="Demande d’accès non autorisée" attachedToRef="archiver_gestion_dossier_medical" cancelActivity="true">
+      <bpmn:outgoing>Flux_10_gestion_dossier_medical</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_demande_gestion_dossier_medical" errorRef="Erreur_gestion_dossier_medical" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="instruire_gestion_dossier_medical" name="Instruire la demande d’accès">
+      <bpmn:incoming>Flux_10_gestion_dossier_medical</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_gestion_dossier_medical</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="fin_gestion_dossier_medical" name="Dossier sécurisé">
+      <bpmn:incoming>Flux_11_gestion_dossier_medical</bpmn:incoming>
+      <bpmn:incoming>Flux_12_gestion_dossier_medical</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_gestion_dossier_medical" sourceRef="debut_gestion_dossier_medical" targetRef="classer_gestion_dossier_medical" />
+    <bpmn:sequenceFlow id="Flux_2_gestion_dossier_medical" sourceRef="classer_gestion_dossier_medical" targetRef="indexer_gestion_dossier_medical" />
+    <bpmn:sequenceFlow id="Flux_3_gestion_dossier_medical" name="Exception" sourceRef="erreur_gestion_dossier_medical" targetRef="bloquer_gestion_dossier_medical" />
+    <bpmn:sequenceFlow id="Flux_4_gestion_dossier_medical" sourceRef="bloquer_gestion_dossier_medical" targetRef="indexer_gestion_dossier_medical" />
+    <bpmn:sequenceFlow id="Flux_5_gestion_dossier_medical" sourceRef="indexer_gestion_dossier_medical" targetRef="completude_gestion_dossier_medical" />
+    <bpmn:sequenceFlow id="Flux_6_gestion_dossier_medical" sourceRef="completude_gestion_dossier_medical" targetRef="complet_gestion_dossier_medical" />
+    <bpmn:sequenceFlow id="Flux_7_gestion_dossier_medical" name="Non" sourceRef="complet_gestion_dossier_medical" targetRef="relancer_gestion_dossier_medical" />
+    <bpmn:sequenceFlow id="Flux_8_gestion_dossier_medical" sourceRef="relancer_gestion_dossier_medical" targetRef="completude_gestion_dossier_medical" />
+    <bpmn:sequenceFlow id="Flux_9_gestion_dossier_medical" name="Oui" sourceRef="complet_gestion_dossier_medical" targetRef="archiver_gestion_dossier_medical" />
+    <bpmn:sequenceFlow id="Flux_10_gestion_dossier_medical" name="Exception" sourceRef="demande_gestion_dossier_medical" targetRef="instruire_gestion_dossier_medical" />
+    <bpmn:sequenceFlow id="Flux_11_gestion_dossier_medical" sourceRef="instruire_gestion_dossier_medical" targetRef="fin_gestion_dossier_medical" />
+    <bpmn:sequenceFlow id="Flux_12_gestion_dossier_medical" sourceRef="archiver_gestion_dossier_medical" targetRef="fin_gestion_dossier_medical" />
+    <bpmn:dataObject id="Objet_dossier_gestion_dossier_medical" />
+    <bpmn:dataObjectReference id="Document_dossier_gestion_dossier_medical" name="Dossier médical et journal d’accès" dataObjectRef="Objet_dossier_gestion_dossier_medical" />
+    <bpmn:association id="Association_dossier_gestion_dossier_medical" sourceRef="Document_dossier_gestion_dossier_medical" targetRef="archiver_gestion_dossier_medical" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_gestion_dossier_medical">
+    <bpmndi:BPMNPlane id="Plan_gestion_dossier_medical" bpmnElement="Processus_gestion_dossier_medical">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_gestion_dossier_medical" bpmnElement="Couloir_1_gestion_dossier_medical" isHorizontal="true"><dc:Bounds x="20" y="30" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_gestion_dossier_medical" bpmnElement="Couloir_2_gestion_dossier_medical" isHorizontal="true"><dc:Bounds x="20" y="250" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_gestion_dossier_medical" bpmnElement="Couloir_3_gestion_dossier_medical" isHorizontal="true"><dc:Bounds x="20" y="470" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_gestion_dossier_medical" bpmnElement="debut_gestion_dossier_medical"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_classer_gestion_dossier_medical" bpmnElement="classer_gestion_dossier_medical"><dc:Bounds x="240" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_indexer_gestion_dossier_medical" bpmnElement="indexer_gestion_dossier_medical"><dc:Bounds x="420" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_erreur_gestion_dossier_medical" bpmnElement="erreur_gestion_dossier_medical"><dc:Bounds x="542" y="382" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_bloquer_gestion_dossier_medical" bpmnElement="bloquer_gestion_dossier_medical"><dc:Bounds x="600" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_completude_gestion_dossier_medical" bpmnElement="completude_gestion_dossier_medical" isExpanded="false"><dc:Bounds x="780" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_complet_gestion_dossier_medical" bpmnElement="complet_gestion_dossier_medical" isMarkerVisible="true"><dc:Bounds x="960" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_relancer_gestion_dossier_medical" bpmnElement="relancer_gestion_dossier_medical"><dc:Bounds x="1140" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_archiver_gestion_dossier_medical" bpmnElement="archiver_gestion_dossier_medical"><dc:Bounds x="1320" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_demande_gestion_dossier_medical" bpmnElement="demande_gestion_dossier_medical"><dc:Bounds x="1442" y="382" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_instruire_gestion_dossier_medical" bpmnElement="instruire_gestion_dossier_medical"><dc:Bounds x="1500" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_gestion_dossier_medical" bpmnElement="fin_gestion_dossier_medical"><dc:Bounds x="1680" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_dossier_gestion_dossier_medical" bpmnElement="Document_dossier_gestion_dossier_medical"><dc:Bounds x="1440" y="409" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_gestion_dossier_medical" bpmnElement="Flux_1_gestion_dossier_medical"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="140" /><di:waypoint x="240" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_gestion_dossier_medical" bpmnElement="Flux_2_gestion_dossier_medical"><di:waypoint x="380" y="140" /><di:waypoint x="400" y="140" /><di:waypoint x="400" y="360" /><di:waypoint x="420" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_gestion_dossier_medical" bpmnElement="Flux_3_gestion_dossier_medical"><di:waypoint x="572" y="397" /><di:waypoint x="586" y="397" /><di:waypoint x="586" y="580" /><di:waypoint x="600" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="571" y="362" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_gestion_dossier_medical" bpmnElement="Flux_4_gestion_dossier_medical"><di:waypoint x="740" y="580" /><di:waypoint x="768" y="580" /><di:waypoint x="768" y="651" /><di:waypoint x="392" y="651" /><di:waypoint x="392" y="360" /><di:waypoint x="420" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_gestion_dossier_medical" bpmnElement="Flux_5_gestion_dossier_medical"><di:waypoint x="560" y="360" /><di:waypoint x="780" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_gestion_dossier_medical" bpmnElement="Flux_6_gestion_dossier_medical"><di:waypoint x="930" y="361" /><di:waypoint x="945" y="361" /><di:waypoint x="945" y="353" /><di:waypoint x="960" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_gestion_dossier_medical" bpmnElement="Flux_7_gestion_dossier_medical"><di:waypoint x="1010" y="353" /><di:waypoint x="1075" y="353" /><di:waypoint x="1075" y="134" /><di:waypoint x="1140" y="134" /><bpmndi:BPMNLabel><dc:Bounds x="1050" y="96" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_gestion_dossier_medical" bpmnElement="Flux_8_gestion_dossier_medical"><di:waypoint x="1176" y="134" /><di:waypoint x="1204" y="134" /><di:waypoint x="1204" y="438" /><di:waypoint x="752" y="438" /><di:waypoint x="752" y="361" /><di:waypoint x="780" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_gestion_dossier_medical" bpmnElement="Flux_9_gestion_dossier_medical"><di:waypoint x="1010" y="353" /><di:waypoint x="1165" y="353" /><di:waypoint x="1165" y="360" /><di:waypoint x="1320" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="1140" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_gestion_dossier_medical" bpmnElement="Flux_10_gestion_dossier_medical"><di:waypoint x="1472" y="397" /><di:waypoint x="1486" y="397" /><di:waypoint x="1486" y="580" /><di:waypoint x="1500" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="1471" y="362" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_gestion_dossier_medical" bpmnElement="Flux_11_gestion_dossier_medical"><di:waypoint x="1640" y="580" /><di:waypoint x="1660" y="580" /><di:waypoint x="1660" y="354" /><di:waypoint x="1680" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_gestion_dossier_medical" bpmnElement="Flux_12_gestion_dossier_medical"><di:waypoint x="1460" y="360" /><di:waypoint x="1570" y="360" /><di:waypoint x="1570" y="354" /><di:waypoint x="1680" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_dossier_gestion_dossier_medical" bpmnElement="Association_dossier_gestion_dossier_medical"><di:waypoint x="1458" y="433" /><di:waypoint x="1390" y="397" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

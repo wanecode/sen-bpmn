@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_demande_analyse_laboratoire" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_demande_analyse_laboratoire" name="Message métier" />
+  <bpmn:error id="Erreur_demande_analyse_laboratoire" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_demande_analyse_laboratoire" name="Demande d’analyse de laboratoire" isExecutable="false">
+    <bpmn:documentation>Prescrire, enregistrer, analyser et restituer un examen biologique avec gestion des résultats critiques. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_demande_analyse_laboratoire">
+      <bpmn:lane id="Couloir_1_demande_analyse_laboratoire" name="Service prescripteur">
+        <bpmn:flowNodeRef>debut_demande_analyse_laboratoire</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>prescrire_demande_analyse_laboratoire</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>rejet_demande_analyse_laboratoire</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>alerter_demande_analyse_laboratoire</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_demande_analyse_laboratoire</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_demande_analyse_laboratoire" name="Accueil / technique de laboratoire">
+        <bpmn:flowNodeRef>enregistrer_demande_analyse_laboratoire</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>nonconforme_demande_analyse_laboratoire</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>analyser_demande_analyse_laboratoire</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>publier_demande_analyse_laboratoire</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_demande_analyse_laboratoire" name="Biologiste médical">
+        <bpmn:flowNodeRef>valider_demande_analyse_laboratoire</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>critique_demande_analyse_laboratoire</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_demande_analyse_laboratoire" name="Besoin d’analyse identifié">
+      <bpmn:outgoing>Flux_1_demande_analyse_laboratoire</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="prescrire_demande_analyse_laboratoire" name="Émettre la prescription argumentée">
+      <bpmn:incoming>Flux_1_demande_analyse_laboratoire</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_demande_analyse_laboratoire</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="enregistrer_demande_analyse_laboratoire" name="Enregistrer la demande et l’échantillon">
+      <bpmn:incoming>Flux_2_demande_analyse_laboratoire</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_demande_analyse_laboratoire</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="nonconforme_demande_analyse_laboratoire" name="Échantillon non conforme" attachedToRef="enregistrer_demande_analyse_laboratoire" cancelActivity="true">
+      <bpmn:outgoing>Flux_3_demande_analyse_laboratoire</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_nonconforme_demande_analyse_laboratoire" errorRef="Erreur_demande_analyse_laboratoire" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="rejet_demande_analyse_laboratoire" name="Notifier le rejet et redemander">
+      <bpmn:incoming>Flux_3_demande_analyse_laboratoire</bpmn:incoming>
+      <bpmn:outgoing>Flux_4_demande_analyse_laboratoire</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="analyser_demande_analyse_laboratoire" name="Réaliser analyse et contrôles qualité">
+      <bpmn:incoming>Flux_5_demande_analyse_laboratoire</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_demande_analyse_laboratoire</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_analyser_demande_analyse_laboratoire"><bpmn:outgoing>Flux_interne_1_analyser_demande_analyse_laboratoire</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_analyser_demande_analyse_laboratoire" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_analyser_demande_analyse_laboratoire</bpmn:incoming><bpmn:outgoing>Flux_interne_2_analyser_demande_analyse_laboratoire</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_analyser_demande_analyse_laboratoire"><bpmn:incoming>Flux_interne_2_analyser_demande_analyse_laboratoire</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_analyser_demande_analyse_laboratoire" sourceRef="Debut_interne_analyser_demande_analyse_laboratoire" targetRef="Etapes_internes_analyser_demande_analyse_laboratoire" />
+      <bpmn:sequenceFlow id="Flux_interne_2_analyser_demande_analyse_laboratoire" sourceRef="Etapes_internes_analyser_demande_analyse_laboratoire" targetRef="Fin_interne_analyser_demande_analyse_laboratoire" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="valider_demande_analyse_laboratoire" name="Valider biologiquement le résultat">
+      <bpmn:incoming>Flux_6_demande_analyse_laboratoire</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_demande_analyse_laboratoire</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="critique_demande_analyse_laboratoire" name="Résultat critique ?">
+      <bpmn:incoming>Flux_7_demande_analyse_laboratoire</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_demande_analyse_laboratoire</bpmn:outgoing>
+      <bpmn:outgoing>Flux_9_demande_analyse_laboratoire</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="alerter_demande_analyse_laboratoire" name="Alerte au prescripteur acquittée">
+      <bpmn:incoming>Flux_8_demande_analyse_laboratoire</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_demande_analyse_laboratoire</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_alerter_demande_analyse_laboratoire" messageRef="Message_demande_analyse_laboratoire" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="publier_demande_analyse_laboratoire" name="Publier le compte rendu">
+      <bpmn:incoming>Flux_9_demande_analyse_laboratoire</bpmn:incoming>
+      <bpmn:incoming>Flux_10_demande_analyse_laboratoire</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_demande_analyse_laboratoire</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="fin_demande_analyse_laboratoire" name="Résultat remis">
+      <bpmn:incoming>Flux_4_demande_analyse_laboratoire</bpmn:incoming>
+      <bpmn:incoming>Flux_11_demande_analyse_laboratoire</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_demande_analyse_laboratoire" sourceRef="debut_demande_analyse_laboratoire" targetRef="prescrire_demande_analyse_laboratoire" />
+    <bpmn:sequenceFlow id="Flux_2_demande_analyse_laboratoire" sourceRef="prescrire_demande_analyse_laboratoire" targetRef="enregistrer_demande_analyse_laboratoire" />
+    <bpmn:sequenceFlow id="Flux_3_demande_analyse_laboratoire" name="Exception" sourceRef="nonconforme_demande_analyse_laboratoire" targetRef="rejet_demande_analyse_laboratoire" />
+    <bpmn:sequenceFlow id="Flux_4_demande_analyse_laboratoire" sourceRef="rejet_demande_analyse_laboratoire" targetRef="fin_demande_analyse_laboratoire" />
+    <bpmn:sequenceFlow id="Flux_5_demande_analyse_laboratoire" sourceRef="enregistrer_demande_analyse_laboratoire" targetRef="analyser_demande_analyse_laboratoire" />
+    <bpmn:sequenceFlow id="Flux_6_demande_analyse_laboratoire" sourceRef="analyser_demande_analyse_laboratoire" targetRef="valider_demande_analyse_laboratoire" />
+    <bpmn:sequenceFlow id="Flux_7_demande_analyse_laboratoire" sourceRef="valider_demande_analyse_laboratoire" targetRef="critique_demande_analyse_laboratoire" />
+    <bpmn:sequenceFlow id="Flux_8_demande_analyse_laboratoire" name="Oui" sourceRef="critique_demande_analyse_laboratoire" targetRef="alerter_demande_analyse_laboratoire" />
+    <bpmn:sequenceFlow id="Flux_9_demande_analyse_laboratoire" name="Non" sourceRef="critique_demande_analyse_laboratoire" targetRef="publier_demande_analyse_laboratoire" />
+    <bpmn:sequenceFlow id="Flux_10_demande_analyse_laboratoire" sourceRef="alerter_demande_analyse_laboratoire" targetRef="publier_demande_analyse_laboratoire" />
+    <bpmn:sequenceFlow id="Flux_11_demande_analyse_laboratoire" sourceRef="publier_demande_analyse_laboratoire" targetRef="fin_demande_analyse_laboratoire" />
+    <bpmn:dataObject id="Objet_bon_labo_demande_analyse_laboratoire" />
+    <bpmn:dataObjectReference id="Document_bon_labo_demande_analyse_laboratoire" name="Bon de demande d’analyse" dataObjectRef="Objet_bon_labo_demande_analyse_laboratoire" />
+    <bpmn:association id="Association_bon_labo_demande_analyse_laboratoire" sourceRef="Document_bon_labo_demande_analyse_laboratoire" targetRef="prescrire_demande_analyse_laboratoire" associationDirection="One" />
+    <bpmn:dataObject id="Objet_compte_rendu_demande_analyse_laboratoire" />
+    <bpmn:dataObjectReference id="Document_compte_rendu_demande_analyse_laboratoire" name="Compte rendu biologique" dataObjectRef="Objet_compte_rendu_demande_analyse_laboratoire" />
+    <bpmn:association id="Association_compte_rendu_demande_analyse_laboratoire" sourceRef="Document_compte_rendu_demande_analyse_laboratoire" targetRef="publier_demande_analyse_laboratoire" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_demande_analyse_laboratoire">
+    <bpmndi:BPMNPlane id="Plan_demande_analyse_laboratoire" bpmnElement="Processus_demande_analyse_laboratoire">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_demande_analyse_laboratoire" bpmnElement="Couloir_1_demande_analyse_laboratoire" isHorizontal="true"><dc:Bounds x="20" y="30" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_demande_analyse_laboratoire" bpmnElement="Couloir_2_demande_analyse_laboratoire" isHorizontal="true"><dc:Bounds x="20" y="250" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_demande_analyse_laboratoire" bpmnElement="Couloir_3_demande_analyse_laboratoire" isHorizontal="true"><dc:Bounds x="20" y="470" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_demande_analyse_laboratoire" bpmnElement="debut_demande_analyse_laboratoire"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_prescrire_demande_analyse_laboratoire" bpmnElement="prescrire_demande_analyse_laboratoire"><dc:Bounds x="240" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_enregistrer_demande_analyse_laboratoire" bpmnElement="enregistrer_demande_analyse_laboratoire"><dc:Bounds x="420" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_nonconforme_demande_analyse_laboratoire" bpmnElement="nonconforme_demande_analyse_laboratoire"><dc:Bounds x="542" y="382" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_rejet_demande_analyse_laboratoire" bpmnElement="rejet_demande_analyse_laboratoire"><dc:Bounds x="600" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_analyser_demande_analyse_laboratoire" bpmnElement="analyser_demande_analyse_laboratoire" isExpanded="false"><dc:Bounds x="780" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_valider_demande_analyse_laboratoire" bpmnElement="valider_demande_analyse_laboratoire"><dc:Bounds x="960" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_critique_demande_analyse_laboratoire" bpmnElement="critique_demande_analyse_laboratoire" isMarkerVisible="true"><dc:Bounds x="1140" y="548" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_alerter_demande_analyse_laboratoire" bpmnElement="alerter_demande_analyse_laboratoire"><dc:Bounds x="1320" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_publier_demande_analyse_laboratoire" bpmnElement="publier_demande_analyse_laboratoire"><dc:Bounds x="1320" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_demande_analyse_laboratoire" bpmnElement="fin_demande_analyse_laboratoire"><dc:Bounds x="1500" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_bon_labo_demande_analyse_laboratoire" bpmnElement="Document_bon_labo_demande_analyse_laboratoire"><dc:Bounds x="360" y="189" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_compte_rendu_demande_analyse_laboratoire" bpmnElement="Document_compte_rendu_demande_analyse_laboratoire"><dc:Bounds x="1440" y="409" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_demande_analyse_laboratoire" bpmnElement="Flux_1_demande_analyse_laboratoire"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="140" /><di:waypoint x="240" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_demande_analyse_laboratoire" bpmnElement="Flux_2_demande_analyse_laboratoire"><di:waypoint x="380" y="140" /><di:waypoint x="400" y="140" /><di:waypoint x="400" y="360" /><di:waypoint x="420" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_demande_analyse_laboratoire" bpmnElement="Flux_3_demande_analyse_laboratoire"><di:waypoint x="572" y="397" /><di:waypoint x="586" y="397" /><di:waypoint x="586" y="140" /><di:waypoint x="600" y="140" /><bpmndi:BPMNLabel><dc:Bounds x="571" y="83" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_demande_analyse_laboratoire" bpmnElement="Flux_4_demande_analyse_laboratoire"><di:waypoint x="740" y="140" /><di:waypoint x="1120" y="140" /><di:waypoint x="1120" y="134" /><di:waypoint x="1500" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_demande_analyse_laboratoire" bpmnElement="Flux_5_demande_analyse_laboratoire"><di:waypoint x="560" y="360" /><di:waypoint x="780" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_demande_analyse_laboratoire" bpmnElement="Flux_6_demande_analyse_laboratoire"><di:waypoint x="930" y="361" /><di:waypoint x="945" y="361" /><di:waypoint x="945" y="580" /><di:waypoint x="960" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_demande_analyse_laboratoire" bpmnElement="Flux_7_demande_analyse_laboratoire"><di:waypoint x="1100" y="580" /><di:waypoint x="1120" y="580" /><di:waypoint x="1120" y="573" /><di:waypoint x="1140" y="573" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_demande_analyse_laboratoire" bpmnElement="Flux_8_demande_analyse_laboratoire"><di:waypoint x="1190" y="573" /><di:waypoint x="1255" y="573" /><di:waypoint x="1255" y="134" /><di:waypoint x="1320" y="134" /><bpmndi:BPMNLabel><dc:Bounds x="1230" y="96" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_demande_analyse_laboratoire" bpmnElement="Flux_9_demande_analyse_laboratoire"><di:waypoint x="1190" y="573" /><di:waypoint x="1255" y="573" /><di:waypoint x="1255" y="360" /><di:waypoint x="1320" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="1230" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_demande_analyse_laboratoire" bpmnElement="Flux_10_demande_analyse_laboratoire"><di:waypoint x="1356" y="134" /><di:waypoint x="1384" y="134" /><di:waypoint x="1384" y="431" /><di:waypoint x="1292" y="431" /><di:waypoint x="1292" y="360" /><di:waypoint x="1320" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_demande_analyse_laboratoire" bpmnElement="Flux_11_demande_analyse_laboratoire"><di:waypoint x="1460" y="360" /><di:waypoint x="1480" y="360" /><di:waypoint x="1480" y="134" /><di:waypoint x="1500" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_bon_labo_demande_analyse_laboratoire" bpmnElement="Association_bon_labo_demande_analyse_laboratoire"><di:waypoint x="378" y="213" /><di:waypoint x="310" y="177" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_compte_rendu_demande_analyse_laboratoire" bpmnElement="Association_compte_rendu_demande_analyse_laboratoire"><di:waypoint x="1458" y="433" /><di:waypoint x="1390" y="397" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

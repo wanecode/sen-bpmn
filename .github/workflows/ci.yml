@@ -1,0 +1,64 @@
+name: Validation continue
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: BPMN, qualité et build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SITE_URL: https://sen-bpmn.example
+      NEXT_PUBLIC_SITE_URL: https://sen-bpmn.example
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v6
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances verrouillées
+        run: npm ci
+
+      - name: Auditer les dépendances de production
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Régénérer les modèles BPMN
+        run: npm run generate:bpmn
+
+      - name: Vérifier que les fichiers générés sont versionnés
+        run: git diff --exit-code -- data/bpmn
+
+      - name: Valider la structure et la traçabilité BPMN
+        run: npm run check:bpmn
+
+      - name: Analyser le code
+        run: npm run lint
+
+      - name: Compiler l’application
+        run: npm run build
+
+      - name: Archiver le rapport de build en cas d’échec
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostic-next-${{ github.run_id }}
+          path: |
+            .next/diagnostics
+            .next/build-manifest.json
+          if-no-files-found: ignore
+          retention-days: 7

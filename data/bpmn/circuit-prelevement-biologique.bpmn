@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_circuit_prelevement_biologique" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_circuit_prelevement_biologique" name="Message métier" />
+  <bpmn:error id="Erreur_circuit_prelevement_biologique" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_circuit_prelevement_biologique" name="Circuit du prélèvement biologique" isExecutable="false">
+    <bpmn:documentation>Garantir l’identitovigilance, la qualité du prélèvement et son acheminement conforme au laboratoire. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_circuit_prelevement_biologique">
+      <bpmn:lane id="Couloir_1_circuit_prelevement_biologique" name="Prescripteur / accueil">
+        <bpmn:flowNodeRef>debut_circuit_prelevement_biologique</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>refaire_circuit_prelevement_biologique</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_circuit_prelevement_biologique" name="Préleveur">
+        <bpmn:flowNodeRef>verifier_circuit_prelevement_biologique</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>preparer_circuit_prelevement_biologique</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>prelever_circuit_prelevement_biologique</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>incident_circuit_prelevement_biologique</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>soins_circuit_prelevement_biologique</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>etiqueter_circuit_prelevement_biologique</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_circuit_prelevement_biologique" name="Transport et laboratoire">
+        <bpmn:flowNodeRef>conforme_circuit_prelevement_biologique</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>acheminer_circuit_prelevement_biologique</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>delai_circuit_prelevement_biologique</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>arrivee_circuit_prelevement_biologique</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>recevoir_circuit_prelevement_biologique</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_circuit_prelevement_biologique</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_circuit_prelevement_biologique" name="Prescription de prélèvement">
+      <bpmn:outgoing>Flux_1_circuit_prelevement_biologique</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="verifier_circuit_prelevement_biologique" name="Vérifier prescription et identité">
+      <bpmn:incoming>Flux_1_circuit_prelevement_biologique</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_circuit_prelevement_biologique</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="preparer_circuit_prelevement_biologique" name="Préparer patient et matériel">
+      <bpmn:incoming>Flux_2_circuit_prelevement_biologique</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_circuit_prelevement_biologique</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_preparer_circuit_prelevement_biologique"><bpmn:outgoing>Flux_interne_1_preparer_circuit_prelevement_biologique</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_preparer_circuit_prelevement_biologique" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_preparer_circuit_prelevement_biologique</bpmn:incoming><bpmn:outgoing>Flux_interne_2_preparer_circuit_prelevement_biologique</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_preparer_circuit_prelevement_biologique"><bpmn:incoming>Flux_interne_2_preparer_circuit_prelevement_biologique</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_preparer_circuit_prelevement_biologique" sourceRef="Debut_interne_preparer_circuit_prelevement_biologique" targetRef="Etapes_internes_preparer_circuit_prelevement_biologique" />
+      <bpmn:sequenceFlow id="Flux_interne_2_preparer_circuit_prelevement_biologique" sourceRef="Etapes_internes_preparer_circuit_prelevement_biologique" targetRef="Fin_interne_preparer_circuit_prelevement_biologique" />
+    </bpmn:subProcess>
+    <bpmn:manualTask id="prelever_circuit_prelevement_biologique" name="Réaliser le prélèvement">
+      <bpmn:incoming>Flux_3_circuit_prelevement_biologique</bpmn:incoming>
+      <bpmn:outgoing>Flux_4_circuit_prelevement_biologique</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:boundaryEvent id="incident_circuit_prelevement_biologique" name="Incident de prélèvement" attachedToRef="prelever_circuit_prelevement_biologique" cancelActivity="true">
+      <bpmn:outgoing>Flux_5_circuit_prelevement_biologique</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_incident_circuit_prelevement_biologique" errorRef="Erreur_circuit_prelevement_biologique" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="soins_circuit_prelevement_biologique" name="Prendre en charge l’incident">
+      <bpmn:incoming>Flux_5_circuit_prelevement_biologique</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_circuit_prelevement_biologique</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="etiqueter_circuit_prelevement_biologique" name="Étiqueter au point de soin">
+      <bpmn:incoming>Flux_4_circuit_prelevement_biologique</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_circuit_prelevement_biologique</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="conforme_circuit_prelevement_biologique" name="Conforme ?">
+      <bpmn:incoming>Flux_7_circuit_prelevement_biologique</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_circuit_prelevement_biologique</bpmn:outgoing>
+      <bpmn:outgoing>Flux_9_circuit_prelevement_biologique</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:subProcess id="acheminer_circuit_prelevement_biologique" name="Conditionner et acheminer">
+      <bpmn:incoming>Flux_8_circuit_prelevement_biologique</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_circuit_prelevement_biologique</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_acheminer_circuit_prelevement_biologique"><bpmn:outgoing>Flux_interne_1_acheminer_circuit_prelevement_biologique</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_acheminer_circuit_prelevement_biologique" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_acheminer_circuit_prelevement_biologique</bpmn:incoming><bpmn:outgoing>Flux_interne_2_acheminer_circuit_prelevement_biologique</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_acheminer_circuit_prelevement_biologique"><bpmn:incoming>Flux_interne_2_acheminer_circuit_prelevement_biologique</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_acheminer_circuit_prelevement_biologique" sourceRef="Debut_interne_acheminer_circuit_prelevement_biologique" targetRef="Etapes_internes_acheminer_circuit_prelevement_biologique" />
+      <bpmn:sequenceFlow id="Flux_interne_2_acheminer_circuit_prelevement_biologique" sourceRef="Etapes_internes_acheminer_circuit_prelevement_biologique" targetRef="Fin_interne_acheminer_circuit_prelevement_biologique" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="delai_circuit_prelevement_biologique" name="Délai de transport dépassé" attachedToRef="acheminer_circuit_prelevement_biologique" cancelActivity="true">
+      <bpmn:outgoing>Flux_10_circuit_prelevement_biologique</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="Definition_temps_delai_circuit_prelevement_biologique" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="refaire_circuit_prelevement_biologique" name="Annuler et reprogrammer">
+      <bpmn:incoming>Flux_6_circuit_prelevement_biologique</bpmn:incoming>
+      <bpmn:incoming>Flux_9_circuit_prelevement_biologique</bpmn:incoming>
+      <bpmn:incoming>Flux_10_circuit_prelevement_biologique</bpmn:incoming>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="arrivee_circuit_prelevement_biologique" name="Échantillon arrivé au laboratoire">
+      <bpmn:incoming>Flux_11_circuit_prelevement_biologique</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_circuit_prelevement_biologique</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_arrivee_circuit_prelevement_biologique" messageRef="Message_circuit_prelevement_biologique" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="recevoir_circuit_prelevement_biologique" name="Réceptionner et tracer">
+      <bpmn:incoming>Flux_12_circuit_prelevement_biologique</bpmn:incoming>
+      <bpmn:outgoing>Flux_13_circuit_prelevement_biologique</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="fin_circuit_prelevement_biologique" name="Échantillon accepté">
+      <bpmn:incoming>Flux_13_circuit_prelevement_biologique</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_circuit_prelevement_biologique" sourceRef="debut_circuit_prelevement_biologique" targetRef="verifier_circuit_prelevement_biologique" />
+    <bpmn:sequenceFlow id="Flux_2_circuit_prelevement_biologique" sourceRef="verifier_circuit_prelevement_biologique" targetRef="preparer_circuit_prelevement_biologique" />
+    <bpmn:sequenceFlow id="Flux_3_circuit_prelevement_biologique" sourceRef="preparer_circuit_prelevement_biologique" targetRef="prelever_circuit_prelevement_biologique" />
+    <bpmn:sequenceFlow id="Flux_4_circuit_prelevement_biologique" sourceRef="prelever_circuit_prelevement_biologique" targetRef="etiqueter_circuit_prelevement_biologique" />
+    <bpmn:sequenceFlow id="Flux_5_circuit_prelevement_biologique" name="Exception" sourceRef="incident_circuit_prelevement_biologique" targetRef="soins_circuit_prelevement_biologique" />
+    <bpmn:sequenceFlow id="Flux_6_circuit_prelevement_biologique" sourceRef="soins_circuit_prelevement_biologique" targetRef="refaire_circuit_prelevement_biologique" />
+    <bpmn:sequenceFlow id="Flux_7_circuit_prelevement_biologique" sourceRef="etiqueter_circuit_prelevement_biologique" targetRef="conforme_circuit_prelevement_biologique" />
+    <bpmn:sequenceFlow id="Flux_8_circuit_prelevement_biologique" name="Oui" sourceRef="conforme_circuit_prelevement_biologique" targetRef="acheminer_circuit_prelevement_biologique" />
+    <bpmn:sequenceFlow id="Flux_9_circuit_prelevement_biologique" name="Non" sourceRef="conforme_circuit_prelevement_biologique" targetRef="refaire_circuit_prelevement_biologique" />
+    <bpmn:sequenceFlow id="Flux_10_circuit_prelevement_biologique" name="Exception" sourceRef="delai_circuit_prelevement_biologique" targetRef="refaire_circuit_prelevement_biologique" />
+    <bpmn:sequenceFlow id="Flux_11_circuit_prelevement_biologique" sourceRef="acheminer_circuit_prelevement_biologique" targetRef="arrivee_circuit_prelevement_biologique" />
+    <bpmn:sequenceFlow id="Flux_12_circuit_prelevement_biologique" sourceRef="arrivee_circuit_prelevement_biologique" targetRef="recevoir_circuit_prelevement_biologique" />
+    <bpmn:sequenceFlow id="Flux_13_circuit_prelevement_biologique" sourceRef="recevoir_circuit_prelevement_biologique" targetRef="fin_circuit_prelevement_biologique" />
+    <bpmn:dataObject id="Objet_etiquette_circuit_prelevement_biologique" />
+    <bpmn:dataObjectReference id="Document_etiquette_circuit_prelevement_biologique" name="Étiquette et feuille de prélèvement" dataObjectRef="Objet_etiquette_circuit_prelevement_biologique" />
+    <bpmn:association id="Association_etiquette_circuit_prelevement_biologique" sourceRef="Document_etiquette_circuit_prelevement_biologique" targetRef="etiqueter_circuit_prelevement_biologique" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_circuit_prelevement_biologique">
+    <bpmndi:BPMNPlane id="Plan_circuit_prelevement_biologique" bpmnElement="Processus_circuit_prelevement_biologique">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_circuit_prelevement_biologique" bpmnElement="Couloir_1_circuit_prelevement_biologique" isHorizontal="true"><dc:Bounds x="20" y="30" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_circuit_prelevement_biologique" bpmnElement="Couloir_2_circuit_prelevement_biologique" isHorizontal="true"><dc:Bounds x="20" y="250" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_circuit_prelevement_biologique" bpmnElement="Couloir_3_circuit_prelevement_biologique" isHorizontal="true"><dc:Bounds x="20" y="470" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_circuit_prelevement_biologique" bpmnElement="debut_circuit_prelevement_biologique"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_verifier_circuit_prelevement_biologique" bpmnElement="verifier_circuit_prelevement_biologique"><dc:Bounds x="240" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_preparer_circuit_prelevement_biologique" bpmnElement="preparer_circuit_prelevement_biologique" isExpanded="false"><dc:Bounds x="420" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_prelever_circuit_prelevement_biologique" bpmnElement="prelever_circuit_prelevement_biologique"><dc:Bounds x="600" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_incident_circuit_prelevement_biologique" bpmnElement="incident_circuit_prelevement_biologique"><dc:Bounds x="722" y="382" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_soins_circuit_prelevement_biologique" bpmnElement="soins_circuit_prelevement_biologique"><dc:Bounds x="780" y="275" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_etiqueter_circuit_prelevement_biologique" bpmnElement="etiqueter_circuit_prelevement_biologique"><dc:Bounds x="780" y="375" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_conforme_circuit_prelevement_biologique" bpmnElement="conforme_circuit_prelevement_biologique" isMarkerVisible="true"><dc:Bounds x="960" y="548" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_acheminer_circuit_prelevement_biologique" bpmnElement="acheminer_circuit_prelevement_biologique" isExpanded="false"><dc:Bounds x="1140" y="538" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_delai_circuit_prelevement_biologique" bpmnElement="delai_circuit_prelevement_biologique"><dc:Bounds x="1272" y="609" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_refaire_circuit_prelevement_biologique" bpmnElement="refaire_circuit_prelevement_biologique"><dc:Bounds x="1320" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_arrivee_circuit_prelevement_biologique" bpmnElement="arrivee_circuit_prelevement_biologique"><dc:Bounds x="1320" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_recevoir_circuit_prelevement_biologique" bpmnElement="recevoir_circuit_prelevement_biologique"><dc:Bounds x="1500" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_circuit_prelevement_biologique" bpmnElement="fin_circuit_prelevement_biologique"><dc:Bounds x="1680" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_etiquette_circuit_prelevement_biologique" bpmnElement="Document_etiquette_circuit_prelevement_biologique"><dc:Bounds x="900" y="412" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_circuit_prelevement_biologique" bpmnElement="Flux_1_circuit_prelevement_biologique"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="360" /><di:waypoint x="240" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_circuit_prelevement_biologique" bpmnElement="Flux_2_circuit_prelevement_biologique"><di:waypoint x="380" y="360" /><di:waypoint x="420" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_circuit_prelevement_biologique" bpmnElement="Flux_3_circuit_prelevement_biologique"><di:waypoint x="570" y="361" /><di:waypoint x="600" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_circuit_prelevement_biologique" bpmnElement="Flux_4_circuit_prelevement_biologique"><di:waypoint x="740" y="360" /><di:waypoint x="760" y="360" /><di:waypoint x="760" y="412" /><di:waypoint x="780" y="412" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_circuit_prelevement_biologique" bpmnElement="Flux_5_circuit_prelevement_biologique"><di:waypoint x="752" y="397" /><di:waypoint x="766" y="397" /><di:waypoint x="766" y="312" /><di:waypoint x="780" y="312" /><bpmndi:BPMNLabel><dc:Bounds x="751" y="255" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_circuit_prelevement_biologique" bpmnElement="Flux_6_circuit_prelevement_biologique"><di:waypoint x="920" y="312" /><di:waypoint x="1120" y="312" /><di:waypoint x="1120" y="140" /><di:waypoint x="1320" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_circuit_prelevement_biologique" bpmnElement="Flux_7_circuit_prelevement_biologique"><di:waypoint x="920" y="412" /><di:waypoint x="940" y="412" /><di:waypoint x="940" y="573" /><di:waypoint x="960" y="573" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_circuit_prelevement_biologique" bpmnElement="Flux_8_circuit_prelevement_biologique"><di:waypoint x="1010" y="573" /><di:waypoint x="1075" y="573" /><di:waypoint x="1075" y="581" /><di:waypoint x="1140" y="581" /><bpmndi:BPMNLabel><dc:Bounds x="1050" y="518" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_circuit_prelevement_biologique" bpmnElement="Flux_9_circuit_prelevement_biologique"><di:waypoint x="1010" y="573" /><di:waypoint x="1165" y="573" /><di:waypoint x="1165" y="140" /><di:waypoint x="1320" y="140" /><bpmndi:BPMNLabel><dc:Bounds x="1140" y="83" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_circuit_prelevement_biologique" bpmnElement="Flux_10_circuit_prelevement_biologique"><di:waypoint x="1302" y="624" /><di:waypoint x="1311" y="624" /><di:waypoint x="1311" y="140" /><di:waypoint x="1320" y="140" /><bpmndi:BPMNLabel><dc:Bounds x="1296" y="83" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_circuit_prelevement_biologique" bpmnElement="Flux_11_circuit_prelevement_biologique"><di:waypoint x="1290" y="581" /><di:waypoint x="1305" y="581" /><di:waypoint x="1305" y="574" /><di:waypoint x="1320" y="574" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_circuit_prelevement_biologique" bpmnElement="Flux_12_circuit_prelevement_biologique"><di:waypoint x="1356" y="574" /><di:waypoint x="1428" y="574" /><di:waypoint x="1428" y="580" /><di:waypoint x="1500" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_13_circuit_prelevement_biologique" bpmnElement="Flux_13_circuit_prelevement_biologique"><di:waypoint x="1640" y="580" /><di:waypoint x="1660" y="580" /><di:waypoint x="1660" y="574" /><di:waypoint x="1680" y="574" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_etiquette_circuit_prelevement_biologique" bpmnElement="Association_etiquette_circuit_prelevement_biologique"><di:waypoint x="918" y="436" /><di:waypoint x="850" y="449" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

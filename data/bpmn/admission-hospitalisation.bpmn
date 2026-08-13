@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_admission_hospitalisation" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_admission_hospitalisation" name="Message métier" />
+  <bpmn:error id="Erreur_admission_hospitalisation" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_admission_hospitalisation" name="Admission en hospitalisation" isExecutable="false">
+    <bpmn:documentation>Sécuriser l’entrée administrative et clinique du patient dans une unité d’hospitalisation. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_admission_hospitalisation">
+      <bpmn:lane id="Couloir_1_admission_hospitalisation" name="Bureau des admissions">
+        <bpmn:flowNodeRef>debut_admission_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>identite_admission_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>anomalie_admission_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>regulariser_admission_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>sejour_admission_hospitalisation</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_admission_hospitalisation" name="Gestion des lits">
+        <bpmn:flowNodeRef>lit_admission_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>attente_admission_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>confirme_admission_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>zone_attente_admission_hospitalisation</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_admission_hospitalisation" name="Unité de soins">
+        <bpmn:flowNodeRef>affecter_admission_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>accueillir_admission_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_admission_hospitalisation</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_admission_hospitalisation" name="Décision d’hospitalisation">
+      <bpmn:outgoing>Flux_1_admission_hospitalisation</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="identite_admission_hospitalisation" name="Sécuriser identité et couverture">
+      <bpmn:incoming>Flux_1_admission_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_admission_hospitalisation</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_identite_admission_hospitalisation"><bpmn:outgoing>Flux_interne_1_identite_admission_hospitalisation</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_identite_admission_hospitalisation" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_identite_admission_hospitalisation</bpmn:incoming><bpmn:outgoing>Flux_interne_2_identite_admission_hospitalisation</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_identite_admission_hospitalisation"><bpmn:incoming>Flux_interne_2_identite_admission_hospitalisation</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_identite_admission_hospitalisation" sourceRef="Debut_interne_identite_admission_hospitalisation" targetRef="Etapes_internes_identite_admission_hospitalisation" />
+      <bpmn:sequenceFlow id="Flux_interne_2_identite_admission_hospitalisation" sourceRef="Etapes_internes_identite_admission_hospitalisation" targetRef="Fin_interne_identite_admission_hospitalisation" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="anomalie_admission_hospitalisation" name="Dossier administratif incomplet" attachedToRef="identite_admission_hospitalisation" cancelActivity="true">
+      <bpmn:outgoing>Flux_3_admission_hospitalisation</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_anomalie_admission_hospitalisation" errorRef="Erreur_admission_hospitalisation" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="regulariser_admission_hospitalisation" name="Ouvrir un dossier provisoire">
+      <bpmn:incoming>Flux_3_admission_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_4_admission_hospitalisation</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="sejour_admission_hospitalisation" name="Créer le séjour">
+      <bpmn:incoming>Flux_2_admission_hospitalisation</bpmn:incoming>
+      <bpmn:incoming>Flux_4_admission_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_admission_hospitalisation</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="lit_admission_hospitalisation" name="Rechercher et réserver un lit">
+      <bpmn:incoming>Flux_5_admission_hospitalisation</bpmn:incoming>
+      <bpmn:incoming>Flux_10_admission_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_admission_hospitalisation</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="attente_admission_hospitalisation" name="Réévaluation de disponibilité">
+      <bpmn:incoming>Flux_6_admission_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_admission_hospitalisation</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="Definition_temps_attente_admission_hospitalisation" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="confirme_admission_hospitalisation" name="Lit confirmé ?">
+      <bpmn:incoming>Flux_7_admission_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_admission_hospitalisation</bpmn:outgoing>
+      <bpmn:outgoing>Flux_9_admission_hospitalisation</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="affecter_admission_hospitalisation" name="Affecter à l’unité">
+      <bpmn:incoming>Flux_8_admission_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_admission_hospitalisation</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="zone_attente_admission_hospitalisation" name="Organiser une zone d’attente sûre">
+      <bpmn:incoming>Flux_9_admission_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_10_admission_hospitalisation</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="accueillir_admission_hospitalisation" name="Réaliser l’accueil soignant">
+      <bpmn:incoming>Flux_11_admission_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_admission_hospitalisation</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_accueillir_admission_hospitalisation"><bpmn:outgoing>Flux_interne_1_accueillir_admission_hospitalisation</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_accueillir_admission_hospitalisation" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_accueillir_admission_hospitalisation</bpmn:incoming><bpmn:outgoing>Flux_interne_2_accueillir_admission_hospitalisation</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_accueillir_admission_hospitalisation"><bpmn:incoming>Flux_interne_2_accueillir_admission_hospitalisation</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_accueillir_admission_hospitalisation" sourceRef="Debut_interne_accueillir_admission_hospitalisation" targetRef="Etapes_internes_accueillir_admission_hospitalisation" />
+      <bpmn:sequenceFlow id="Flux_interne_2_accueillir_admission_hospitalisation" sourceRef="Etapes_internes_accueillir_admission_hospitalisation" targetRef="Fin_interne_accueillir_admission_hospitalisation" />
+    </bpmn:subProcess>
+    <bpmn:endEvent id="fin_admission_hospitalisation" name="Admission terminée">
+      <bpmn:incoming>Flux_12_admission_hospitalisation</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_admission_hospitalisation" sourceRef="debut_admission_hospitalisation" targetRef="identite_admission_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_2_admission_hospitalisation" sourceRef="identite_admission_hospitalisation" targetRef="sejour_admission_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_3_admission_hospitalisation" name="Exception" sourceRef="anomalie_admission_hospitalisation" targetRef="regulariser_admission_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_4_admission_hospitalisation" sourceRef="regulariser_admission_hospitalisation" targetRef="sejour_admission_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_5_admission_hospitalisation" sourceRef="sejour_admission_hospitalisation" targetRef="lit_admission_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_6_admission_hospitalisation" sourceRef="lit_admission_hospitalisation" targetRef="attente_admission_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_7_admission_hospitalisation" sourceRef="attente_admission_hospitalisation" targetRef="confirme_admission_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_8_admission_hospitalisation" name="Oui" sourceRef="confirme_admission_hospitalisation" targetRef="affecter_admission_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_9_admission_hospitalisation" name="Non" sourceRef="confirme_admission_hospitalisation" targetRef="zone_attente_admission_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_10_admission_hospitalisation" sourceRef="zone_attente_admission_hospitalisation" targetRef="lit_admission_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_11_admission_hospitalisation" sourceRef="affecter_admission_hospitalisation" targetRef="accueillir_admission_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_12_admission_hospitalisation" sourceRef="accueillir_admission_hospitalisation" targetRef="fin_admission_hospitalisation" />
+    <bpmn:dataObject id="Objet_dossier_sejour_admission_hospitalisation" />
+    <bpmn:dataObjectReference id="Document_dossier_sejour_admission_hospitalisation" name="Dossier administratif de séjour" dataObjectRef="Objet_dossier_sejour_admission_hospitalisation" />
+    <bpmn:association id="Association_dossier_sejour_admission_hospitalisation" sourceRef="Document_dossier_sejour_admission_hospitalisation" targetRef="sejour_admission_hospitalisation" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_admission_hospitalisation">
+    <bpmndi:BPMNPlane id="Plan_admission_hospitalisation" bpmnElement="Processus_admission_hospitalisation">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_admission_hospitalisation" bpmnElement="Couloir_1_admission_hospitalisation" isHorizontal="true"><dc:Bounds x="20" y="30" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_admission_hospitalisation" bpmnElement="Couloir_2_admission_hospitalisation" isHorizontal="true"><dc:Bounds x="20" y="250" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_admission_hospitalisation" bpmnElement="Couloir_3_admission_hospitalisation" isHorizontal="true"><dc:Bounds x="20" y="470" width="1990" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_admission_hospitalisation" bpmnElement="debut_admission_hospitalisation"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_identite_admission_hospitalisation" bpmnElement="identite_admission_hospitalisation" isExpanded="false"><dc:Bounds x="240" y="98" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_anomalie_admission_hospitalisation" bpmnElement="anomalie_admission_hospitalisation"><dc:Bounds x="372" y="169" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_regulariser_admission_hospitalisation" bpmnElement="regulariser_admission_hospitalisation"><dc:Bounds x="420" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_sejour_admission_hospitalisation" bpmnElement="sejour_admission_hospitalisation"><dc:Bounds x="600" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_lit_admission_hospitalisation" bpmnElement="lit_admission_hospitalisation"><dc:Bounds x="780" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_attente_admission_hospitalisation" bpmnElement="attente_admission_hospitalisation"><dc:Bounds x="960" y="336" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_confirme_admission_hospitalisation" bpmnElement="confirme_admission_hospitalisation" isMarkerVisible="true"><dc:Bounds x="1140" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_affecter_admission_hospitalisation" bpmnElement="affecter_admission_hospitalisation"><dc:Bounds x="1320" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_zone_attente_admission_hospitalisation" bpmnElement="zone_attente_admission_hospitalisation"><dc:Bounds x="1320" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_accueillir_admission_hospitalisation" bpmnElement="accueillir_admission_hospitalisation" isExpanded="false"><dc:Bounds x="1500" y="538" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_admission_hospitalisation" bpmnElement="fin_admission_hospitalisation"><dc:Bounds x="1680" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_dossier_sejour_admission_hospitalisation" bpmnElement="Document_dossier_sejour_admission_hospitalisation"><dc:Bounds x="720" y="189" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_admission_hospitalisation" bpmnElement="Flux_1_admission_hospitalisation"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="141" /><di:waypoint x="240" y="141" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_admission_hospitalisation" bpmnElement="Flux_2_admission_hospitalisation"><di:waypoint x="390" y="141" /><di:waypoint x="600" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_admission_hospitalisation" bpmnElement="Flux_3_admission_hospitalisation"><di:waypoint x="402" y="184" /><di:waypoint x="411" y="184" /><di:waypoint x="411" y="140" /><di:waypoint x="420" y="140" /><bpmndi:BPMNLabel><dc:Bounds x="396" y="83" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_admission_hospitalisation" bpmnElement="Flux_4_admission_hospitalisation"><di:waypoint x="560" y="140" /><di:waypoint x="600" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_admission_hospitalisation" bpmnElement="Flux_5_admission_hospitalisation"><di:waypoint x="740" y="140" /><di:waypoint x="760" y="140" /><di:waypoint x="760" y="360" /><di:waypoint x="780" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_admission_hospitalisation" bpmnElement="Flux_6_admission_hospitalisation"><di:waypoint x="920" y="360" /><di:waypoint x="940" y="360" /><di:waypoint x="940" y="354" /><di:waypoint x="960" y="354" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_admission_hospitalisation" bpmnElement="Flux_7_admission_hospitalisation"><di:waypoint x="996" y="354" /><di:waypoint x="1140" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_admission_hospitalisation" bpmnElement="Flux_8_admission_hospitalisation"><di:waypoint x="1190" y="353" /><di:waypoint x="1255" y="353" /><di:waypoint x="1255" y="580" /><di:waypoint x="1320" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="1230" y="308" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_admission_hospitalisation" bpmnElement="Flux_9_admission_hospitalisation"><di:waypoint x="1190" y="353" /><di:waypoint x="1255" y="353" /><di:waypoint x="1255" y="360" /><di:waypoint x="1320" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="1230" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_admission_hospitalisation" bpmnElement="Flux_10_admission_hospitalisation"><di:waypoint x="1460" y="360" /><di:waypoint x="1488" y="360" /><di:waypoint x="1488" y="431" /><di:waypoint x="752" y="431" /><di:waypoint x="752" y="360" /><di:waypoint x="780" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_admission_hospitalisation" bpmnElement="Flux_11_admission_hospitalisation"><di:waypoint x="1460" y="580" /><di:waypoint x="1500" y="581" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_admission_hospitalisation" bpmnElement="Flux_12_admission_hospitalisation"><di:waypoint x="1650" y="581" /><di:waypoint x="1665" y="581" /><di:waypoint x="1665" y="574" /><di:waypoint x="1680" y="574" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_dossier_sejour_admission_hospitalisation" bpmnElement="Association_dossier_sejour_admission_hospitalisation"><di:waypoint x="738" y="213" /><di:waypoint x="670" y="177" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

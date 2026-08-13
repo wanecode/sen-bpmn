@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_consultation_externe" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_consultation_externe" name="Message métier" />
+  <bpmn:error id="Erreur_consultation_externe" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_consultation_externe" name="Réalisation d’une consultation externe" isExecutable="false">
+    <bpmn:documentation>Décrire le parcours du patient depuis son accueil jusqu’à la prescription et la planification du suivi. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_consultation_externe">
+      <bpmn:lane id="Couloir_1_consultation_externe" name="Accueil de consultation">
+        <bpmn:flowNodeRef>debut_consultation_externe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>admettre_consultation_externe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_consultation_externe</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_consultation_externe" name="Médecin consultant">
+        <bpmn:flowNodeRef>evaluer_consultation_externe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>aggravation_consultation_externe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>diagnostic_consultation_externe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>examen_consultation_externe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>traitement_consultation_externe</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_consultation_externe" name="Plateau technique ou patient">
+        <bpmn:flowNodeRef>urgence_consultation_externe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>prescrire_examen_consultation_externe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>resultat_consultation_externe</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_consultation_externe" name="Patient présenté">
+      <bpmn:outgoing>Flux_1_consultation_externe</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="admettre_consultation_externe" name="Confirmer identité et rendez-vous">
+      <bpmn:incoming>Flux_1_consultation_externe</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_consultation_externe</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="evaluer_consultation_externe" name="Réaliser l’évaluation clinique">
+      <bpmn:incoming>Flux_2_consultation_externe</bpmn:incoming>
+      <bpmn:outgoing>Flux_3_consultation_externe</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_evaluer_consultation_externe"><bpmn:outgoing>Flux_interne_1_evaluer_consultation_externe</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_evaluer_consultation_externe" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_evaluer_consultation_externe</bpmn:incoming><bpmn:outgoing>Flux_interne_2_evaluer_consultation_externe</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_evaluer_consultation_externe"><bpmn:incoming>Flux_interne_2_evaluer_consultation_externe</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_evaluer_consultation_externe" sourceRef="Debut_interne_evaluer_consultation_externe" targetRef="Etapes_internes_evaluer_consultation_externe" />
+      <bpmn:sequenceFlow id="Flux_interne_2_evaluer_consultation_externe" sourceRef="Etapes_internes_evaluer_consultation_externe" targetRef="Fin_interne_evaluer_consultation_externe" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="aggravation_consultation_externe" name="Aggravation aiguë" attachedToRef="evaluer_consultation_externe" cancelActivity="true">
+      <bpmn:outgoing>Flux_4_consultation_externe</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_aggravation_consultation_externe" errorRef="Erreur_consultation_externe" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="urgence_consultation_externe" name="Transférer aux urgences">
+      <bpmn:incoming>Flux_4_consultation_externe</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_consultation_externe</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="diagnostic_consultation_externe" name="Consigner l’hypothèse diagnostique">
+      <bpmn:incoming>Flux_3_consultation_externe</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_consultation_externe</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="examen_consultation_externe" name="Examen complémentaire ?">
+      <bpmn:incoming>Flux_6_consultation_externe</bpmn:incoming>
+      <bpmn:outgoing>Flux_7_consultation_externe</bpmn:outgoing>
+      <bpmn:outgoing>Flux_10_consultation_externe</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="prescrire_examen_consultation_externe" name="Prescrire l’examen">
+      <bpmn:incoming>Flux_7_consultation_externe</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_consultation_externe</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="resultat_consultation_externe" name="Résultat reçu">
+      <bpmn:incoming>Flux_8_consultation_externe</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_consultation_externe</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_resultat_consultation_externe" messageRef="Message_consultation_externe" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="traitement_consultation_externe" name="Définir traitement et suivi">
+      <bpmn:incoming>Flux_9_consultation_externe</bpmn:incoming>
+      <bpmn:incoming>Flux_10_consultation_externe</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_consultation_externe</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="fin_consultation_externe" name="Consultation terminée">
+      <bpmn:incoming>Flux_5_consultation_externe</bpmn:incoming>
+      <bpmn:incoming>Flux_11_consultation_externe</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_consultation_externe" sourceRef="debut_consultation_externe" targetRef="admettre_consultation_externe" />
+    <bpmn:sequenceFlow id="Flux_2_consultation_externe" sourceRef="admettre_consultation_externe" targetRef="evaluer_consultation_externe" />
+    <bpmn:sequenceFlow id="Flux_3_consultation_externe" sourceRef="evaluer_consultation_externe" targetRef="diagnostic_consultation_externe" />
+    <bpmn:sequenceFlow id="Flux_4_consultation_externe" name="Exception" sourceRef="aggravation_consultation_externe" targetRef="urgence_consultation_externe" />
+    <bpmn:sequenceFlow id="Flux_5_consultation_externe" sourceRef="urgence_consultation_externe" targetRef="fin_consultation_externe" />
+    <bpmn:sequenceFlow id="Flux_6_consultation_externe" sourceRef="diagnostic_consultation_externe" targetRef="examen_consultation_externe" />
+    <bpmn:sequenceFlow id="Flux_7_consultation_externe" name="Oui" sourceRef="examen_consultation_externe" targetRef="prescrire_examen_consultation_externe" />
+    <bpmn:sequenceFlow id="Flux_8_consultation_externe" sourceRef="prescrire_examen_consultation_externe" targetRef="resultat_consultation_externe" />
+    <bpmn:sequenceFlow id="Flux_9_consultation_externe" sourceRef="resultat_consultation_externe" targetRef="traitement_consultation_externe" />
+    <bpmn:sequenceFlow id="Flux_10_consultation_externe" name="Non" sourceRef="examen_consultation_externe" targetRef="traitement_consultation_externe" />
+    <bpmn:sequenceFlow id="Flux_11_consultation_externe" sourceRef="traitement_consultation_externe" targetRef="fin_consultation_externe" />
+    <bpmn:dataObject id="Objet_observation_consultation_externe" />
+    <bpmn:dataObjectReference id="Document_observation_consultation_externe" name="Observation médicale" dataObjectRef="Objet_observation_consultation_externe" />
+    <bpmn:association id="Association_observation_consultation_externe" sourceRef="Document_observation_consultation_externe" targetRef="diagnostic_consultation_externe" associationDirection="One" />
+    <bpmn:dataObject id="Objet_ordonnance_consultation_externe" />
+    <bpmn:dataObjectReference id="Document_ordonnance_consultation_externe" name="Ordonnance et plan de suivi" dataObjectRef="Objet_ordonnance_consultation_externe" />
+    <bpmn:association id="Association_ordonnance_consultation_externe" sourceRef="Document_ordonnance_consultation_externe" targetRef="traitement_consultation_externe" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_consultation_externe">
+    <bpmndi:BPMNPlane id="Plan_consultation_externe" bpmnElement="Processus_consultation_externe">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_consultation_externe" bpmnElement="Couloir_1_consultation_externe" isHorizontal="true"><dc:Bounds x="20" y="30" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_consultation_externe" bpmnElement="Couloir_2_consultation_externe" isHorizontal="true"><dc:Bounds x="20" y="250" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_consultation_externe" bpmnElement="Couloir_3_consultation_externe" isHorizontal="true"><dc:Bounds x="20" y="470" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_consultation_externe" bpmnElement="debut_consultation_externe"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_admettre_consultation_externe" bpmnElement="admettre_consultation_externe"><dc:Bounds x="240" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_evaluer_consultation_externe" bpmnElement="evaluer_consultation_externe" isExpanded="false"><dc:Bounds x="420" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_aggravation_consultation_externe" bpmnElement="aggravation_consultation_externe"><dc:Bounds x="552" y="389" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_urgence_consultation_externe" bpmnElement="urgence_consultation_externe"><dc:Bounds x="600" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_diagnostic_consultation_externe" bpmnElement="diagnostic_consultation_externe"><dc:Bounds x="600" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_examen_consultation_externe" bpmnElement="examen_consultation_externe" isMarkerVisible="true"><dc:Bounds x="780" y="328" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_prescrire_examen_consultation_externe" bpmnElement="prescrire_examen_consultation_externe"><dc:Bounds x="960" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_resultat_consultation_externe" bpmnElement="resultat_consultation_externe"><dc:Bounds x="1140" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_traitement_consultation_externe" bpmnElement="traitement_consultation_externe"><dc:Bounds x="1320" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_consultation_externe" bpmnElement="fin_consultation_externe"><dc:Bounds x="1500" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_observation_consultation_externe" bpmnElement="Document_observation_consultation_externe"><dc:Bounds x="720" y="409" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_ordonnance_consultation_externe" bpmnElement="Document_ordonnance_consultation_externe"><dc:Bounds x="1440" y="409" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_consultation_externe" bpmnElement="Flux_1_consultation_externe"><di:waypoint x="96" y="134" /><di:waypoint x="168" y="134" /><di:waypoint x="168" y="140" /><di:waypoint x="240" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_consultation_externe" bpmnElement="Flux_2_consultation_externe"><di:waypoint x="380" y="140" /><di:waypoint x="400" y="140" /><di:waypoint x="400" y="361" /><di:waypoint x="420" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_consultation_externe" bpmnElement="Flux_3_consultation_externe"><di:waypoint x="570" y="361" /><di:waypoint x="600" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_consultation_externe" bpmnElement="Flux_4_consultation_externe"><di:waypoint x="582" y="404" /><di:waypoint x="591" y="404" /><di:waypoint x="591" y="580" /><di:waypoint x="600" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="576" y="369" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_consultation_externe" bpmnElement="Flux_5_consultation_externe"><di:waypoint x="740" y="580" /><di:waypoint x="1120" y="580" /><di:waypoint x="1120" y="134" /><di:waypoint x="1500" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_consultation_externe" bpmnElement="Flux_6_consultation_externe"><di:waypoint x="740" y="360" /><di:waypoint x="760" y="360" /><di:waypoint x="760" y="353" /><di:waypoint x="780" y="353" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_consultation_externe" bpmnElement="Flux_7_consultation_externe"><di:waypoint x="830" y="353" /><di:waypoint x="895" y="353" /><di:waypoint x="895" y="580" /><di:waypoint x="960" y="580" /><bpmndi:BPMNLabel><dc:Bounds x="870" y="308" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_consultation_externe" bpmnElement="Flux_8_consultation_externe"><di:waypoint x="1100" y="580" /><di:waypoint x="1120" y="580" /><di:waypoint x="1120" y="574" /><di:waypoint x="1140" y="574" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_consultation_externe" bpmnElement="Flux_9_consultation_externe"><di:waypoint x="1176" y="574" /><di:waypoint x="1248" y="574" /><di:waypoint x="1248" y="360" /><di:waypoint x="1320" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_consultation_externe" bpmnElement="Flux_10_consultation_externe"><di:waypoint x="830" y="353" /><di:waypoint x="1075" y="353" /><di:waypoint x="1075" y="360" /><di:waypoint x="1320" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="1050" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_consultation_externe" bpmnElement="Flux_11_consultation_externe"><di:waypoint x="1460" y="360" /><di:waypoint x="1480" y="360" /><di:waypoint x="1480" y="134" /><di:waypoint x="1500" y="134" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_observation_consultation_externe" bpmnElement="Association_observation_consultation_externe"><di:waypoint x="738" y="433" /><di:waypoint x="670" y="397" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_ordonnance_consultation_externe" bpmnElement="Association_ordonnance_consultation_externe"><di:waypoint x="1458" y="433" /><di:waypoint x="1390" y="397" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

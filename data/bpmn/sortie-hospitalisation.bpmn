@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_sortie_hospitalisation" targetNamespace="https://sen-bpmn.org/processus">
+  <bpmn:message id="Message_sortie_hospitalisation" name="Message métier" />
+  <bpmn:error id="Erreur_sortie_hospitalisation" name="Exception de processus" errorCode="EXCEPTION" />
+  <bpmn:process id="Processus_sortie_hospitalisation" name="Sortie du patient hospitalisé" isExecutable="false">
+    <bpmn:documentation>Anticiper une sortie sûre avec documents, traitement, éducation du patient et continuité des soins. Révision du modèle : 2.0.</bpmn:documentation>
+    <bpmn:laneSet id="Ensemble_couloirs_sortie_hospitalisation">
+      <bpmn:lane id="Couloir_1_sortie_hospitalisation" name="Médecin responsable">
+        <bpmn:flowNodeRef>debut_sortie_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_sortie_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>documents_sortie_hospitalisation</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_2_sortie_hospitalisation" name="Équipe soignante / pharmacie">
+        <bpmn:flowNodeRef>medicaments_sortie_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>education_sortie_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>incomplet_sortie_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>reprendre_sortie_hospitalisation</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Couloir_3_sortie_hospitalisation" name="Admissions et relais externe">
+        <bpmn:flowNodeRef>relais_sortie_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>coordonner_sortie_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>merge_sortie_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>cloturer_sortie_hospitalisation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>fin_sortie_hospitalisation</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="debut_sortie_hospitalisation" name="Sortie médicalement envisagée">
+      <bpmn:outgoing>Flux_1_sortie_hospitalisation</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="split_sortie_hospitalisation" name="Préparation coordonnée">
+      <bpmn:incoming>Flux_1_sortie_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_2_sortie_hospitalisation</bpmn:outgoing>
+      <bpmn:outgoing>Flux_3_sortie_hospitalisation</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="documents_sortie_hospitalisation" name="Rédiger les documents de sortie">
+      <bpmn:incoming>Flux_2_sortie_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_4_sortie_hospitalisation</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:subProcess id="medicaments_sortie_hospitalisation" name="Préparer le traitement de sortie">
+      <bpmn:incoming>Flux_3_sortie_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_5_sortie_hospitalisation</bpmn:outgoing>
+      <bpmn:startEvent id="Debut_interne_medicaments_sortie_hospitalisation"><bpmn:outgoing>Flux_interne_1_medicaments_sortie_hospitalisation</bpmn:outgoing></bpmn:startEvent>
+      <bpmn:task id="Etapes_internes_medicaments_sortie_hospitalisation" name="Exécuter les étapes détaillées"><bpmn:incoming>Flux_interne_1_medicaments_sortie_hospitalisation</bpmn:incoming><bpmn:outgoing>Flux_interne_2_medicaments_sortie_hospitalisation</bpmn:outgoing></bpmn:task>
+      <bpmn:endEvent id="Fin_interne_medicaments_sortie_hospitalisation"><bpmn:incoming>Flux_interne_2_medicaments_sortie_hospitalisation</bpmn:incoming></bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flux_interne_1_medicaments_sortie_hospitalisation" sourceRef="Debut_interne_medicaments_sortie_hospitalisation" targetRef="Etapes_internes_medicaments_sortie_hospitalisation" />
+      <bpmn:sequenceFlow id="Flux_interne_2_medicaments_sortie_hospitalisation" sourceRef="Etapes_internes_medicaments_sortie_hospitalisation" targetRef="Fin_interne_medicaments_sortie_hospitalisation" />
+    </bpmn:subProcess>
+    <bpmn:userTask id="education_sortie_hospitalisation" name="Expliquer traitement et signes d’alerte">
+      <bpmn:incoming>Flux_5_sortie_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_6_sortie_hospitalisation</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="incomplet_sortie_hospitalisation" name="Compréhension insuffisante" attachedToRef="education_sortie_hospitalisation" cancelActivity="true">
+      <bpmn:outgoing>Flux_7_sortie_hospitalisation</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="Definition_erreur_incomplet_sortie_hospitalisation" errorRef="Erreur_sortie_hospitalisation" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="reprendre_sortie_hospitalisation" name="Reprendre l’éducation avec l’accompagnant">
+      <bpmn:incoming>Flux_7_sortie_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_8_sortie_hospitalisation</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="relais_sortie_hospitalisation" name="Relais externe requis ?">
+      <bpmn:incoming>Flux_4_sortie_hospitalisation</bpmn:incoming>
+      <bpmn:incoming>Flux_6_sortie_hospitalisation</bpmn:incoming>
+      <bpmn:incoming>Flux_8_sortie_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_9_sortie_hospitalisation</bpmn:outgoing>
+      <bpmn:outgoing>Flux_10_sortie_hospitalisation</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="coordonner_sortie_hospitalisation" name="Relais confirmé">
+      <bpmn:incoming>Flux_9_sortie_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_11_sortie_hospitalisation</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="Definition_message_coordonner_sortie_hospitalisation" messageRef="Message_sortie_hospitalisation" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:parallelGateway id="merge_sortie_hospitalisation" name="Dossier prêt">
+      <bpmn:incoming>Flux_10_sortie_hospitalisation</bpmn:incoming>
+      <bpmn:incoming>Flux_11_sortie_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_12_sortie_hospitalisation</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="cloturer_sortie_hospitalisation" name="Clôturer le séjour et remettre les pièces">
+      <bpmn:incoming>Flux_12_sortie_hospitalisation</bpmn:incoming>
+      <bpmn:outgoing>Flux_13_sortie_hospitalisation</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="fin_sortie_hospitalisation" name="Patient sorti">
+      <bpmn:incoming>Flux_13_sortie_hospitalisation</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flux_1_sortie_hospitalisation" sourceRef="debut_sortie_hospitalisation" targetRef="split_sortie_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_2_sortie_hospitalisation" sourceRef="split_sortie_hospitalisation" targetRef="documents_sortie_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_3_sortie_hospitalisation" sourceRef="split_sortie_hospitalisation" targetRef="medicaments_sortie_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_4_sortie_hospitalisation" sourceRef="documents_sortie_hospitalisation" targetRef="relais_sortie_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_5_sortie_hospitalisation" sourceRef="medicaments_sortie_hospitalisation" targetRef="education_sortie_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_6_sortie_hospitalisation" sourceRef="education_sortie_hospitalisation" targetRef="relais_sortie_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_7_sortie_hospitalisation" name="Exception" sourceRef="incomplet_sortie_hospitalisation" targetRef="reprendre_sortie_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_8_sortie_hospitalisation" sourceRef="reprendre_sortie_hospitalisation" targetRef="relais_sortie_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_9_sortie_hospitalisation" name="Oui" sourceRef="relais_sortie_hospitalisation" targetRef="coordonner_sortie_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_10_sortie_hospitalisation" name="Non" sourceRef="relais_sortie_hospitalisation" targetRef="merge_sortie_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_11_sortie_hospitalisation" sourceRef="coordonner_sortie_hospitalisation" targetRef="merge_sortie_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_12_sortie_hospitalisation" sourceRef="merge_sortie_hospitalisation" targetRef="cloturer_sortie_hospitalisation" />
+    <bpmn:sequenceFlow id="Flux_13_sortie_hospitalisation" sourceRef="cloturer_sortie_hospitalisation" targetRef="fin_sortie_hospitalisation" />
+    <bpmn:dataObject id="Objet_lettre_sortie_sortie_hospitalisation" />
+    <bpmn:dataObjectReference id="Document_lettre_sortie_sortie_hospitalisation" name="Lettre et résumé de sortie" dataObjectRef="Objet_lettre_sortie_sortie_hospitalisation" />
+    <bpmn:association id="Association_lettre_sortie_sortie_hospitalisation" sourceRef="Document_lettre_sortie_sortie_hospitalisation" targetRef="documents_sortie_hospitalisation" associationDirection="One" />
+    <bpmn:dataObject id="Objet_ordonnance_sortie_sortie_hospitalisation" />
+    <bpmn:dataObjectReference id="Document_ordonnance_sortie_sortie_hospitalisation" name="Ordonnance de sortie" dataObjectRef="Objet_ordonnance_sortie_sortie_hospitalisation" />
+    <bpmn:association id="Association_ordonnance_sortie_sortie_hospitalisation" sourceRef="Document_ordonnance_sortie_sortie_hospitalisation" targetRef="medicaments_sortie_hospitalisation" associationDirection="One" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagramme_sortie_hospitalisation">
+    <bpmndi:BPMNPlane id="Plan_sortie_hospitalisation" bpmnElement="Processus_sortie_hospitalisation">
+      <bpmndi:BPMNShape id="Forme_Couloir_1_sortie_hospitalisation" bpmnElement="Couloir_1_sortie_hospitalisation" isHorizontal="true"><dc:Bounds x="20" y="30" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_2_sortie_hospitalisation" bpmnElement="Couloir_2_sortie_hospitalisation" isHorizontal="true"><dc:Bounds x="20" y="250" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Couloir_3_sortie_hospitalisation" bpmnElement="Couloir_3_sortie_hospitalisation" isHorizontal="true"><dc:Bounds x="20" y="470" width="1810" height="220" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_debut_sortie_hospitalisation" bpmnElement="debut_sortie_hospitalisation"><dc:Bounds x="60" y="116" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_split_sortie_hospitalisation" bpmnElement="split_sortie_hospitalisation" isMarkerVisible="true"><dc:Bounds x="240" y="108" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_documents_sortie_hospitalisation" bpmnElement="documents_sortie_hospitalisation"><dc:Bounds x="420" y="103" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_medicaments_sortie_hospitalisation" bpmnElement="medicaments_sortie_hospitalisation" isExpanded="false"><dc:Bounds x="420" y="318" width="150" height="86" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_education_sortie_hospitalisation" bpmnElement="education_sortie_hospitalisation"><dc:Bounds x="600" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_incomplet_sortie_hospitalisation" bpmnElement="incomplet_sortie_hospitalisation"><dc:Bounds x="722" y="382" width="30" height="30" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_reprendre_sortie_hospitalisation" bpmnElement="reprendre_sortie_hospitalisation"><dc:Bounds x="780" y="323" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_relais_sortie_hospitalisation" bpmnElement="relais_sortie_hospitalisation" isMarkerVisible="true"><dc:Bounds x="780" y="548" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_coordonner_sortie_hospitalisation" bpmnElement="coordonner_sortie_hospitalisation"><dc:Bounds x="960" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_merge_sortie_hospitalisation" bpmnElement="merge_sortie_hospitalisation" isMarkerVisible="true"><dc:Bounds x="1140" y="548" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_cloturer_sortie_hospitalisation" bpmnElement="cloturer_sortie_hospitalisation"><dc:Bounds x="1320" y="543" width="140" height="74" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_fin_sortie_hospitalisation" bpmnElement="fin_sortie_hospitalisation"><dc:Bounds x="1500" y="556" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_lettre_sortie_sortie_hospitalisation" bpmnElement="Document_lettre_sortie_sortie_hospitalisation"><dc:Bounds x="540" y="189" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forme_Document_ordonnance_sortie_sortie_hospitalisation" bpmnElement="Document_ordonnance_sortie_sortie_hospitalisation"><dc:Bounds x="550" y="412" width="36" height="48" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Arete_Flux_1_sortie_hospitalisation" bpmnElement="Flux_1_sortie_hospitalisation"><di:waypoint x="96" y="134" /><di:waypoint x="240" y="133" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_2_sortie_hospitalisation" bpmnElement="Flux_2_sortie_hospitalisation"><di:waypoint x="290" y="133" /><di:waypoint x="355" y="133" /><di:waypoint x="355" y="140" /><di:waypoint x="420" y="140" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_3_sortie_hospitalisation" bpmnElement="Flux_3_sortie_hospitalisation"><di:waypoint x="290" y="133" /><di:waypoint x="355" y="133" /><di:waypoint x="355" y="361" /><di:waypoint x="420" y="361" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_4_sortie_hospitalisation" bpmnElement="Flux_4_sortie_hospitalisation"><di:waypoint x="560" y="140" /><di:waypoint x="670" y="140" /><di:waypoint x="670" y="573" /><di:waypoint x="780" y="573" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_5_sortie_hospitalisation" bpmnElement="Flux_5_sortie_hospitalisation"><di:waypoint x="570" y="361" /><di:waypoint x="600" y="360" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_6_sortie_hospitalisation" bpmnElement="Flux_6_sortie_hospitalisation"><di:waypoint x="740" y="360" /><di:waypoint x="760" y="360" /><di:waypoint x="760" y="573" /><di:waypoint x="780" y="573" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_7_sortie_hospitalisation" bpmnElement="Flux_7_sortie_hospitalisation"><di:waypoint x="752" y="397" /><di:waypoint x="766" y="397" /><di:waypoint x="766" y="360" /><di:waypoint x="780" y="360" /><bpmndi:BPMNLabel><dc:Bounds x="751" y="303" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_8_sortie_hospitalisation" bpmnElement="Flux_8_sortie_hospitalisation"><di:waypoint x="920" y="360" /><di:waypoint x="948" y="360" /><di:waypoint x="948" y="632" /><di:waypoint x="752" y="632" /><di:waypoint x="752" y="573" /><di:waypoint x="780" y="573" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_9_sortie_hospitalisation" bpmnElement="Flux_9_sortie_hospitalisation"><di:waypoint x="830" y="573" /><di:waypoint x="960" y="574" /><bpmndi:BPMNLabel><dc:Bounds x="870" y="528" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_10_sortie_hospitalisation" bpmnElement="Flux_10_sortie_hospitalisation"><di:waypoint x="830" y="573" /><di:waypoint x="1140" y="573" /><bpmndi:BPMNLabel><dc:Bounds x="960" y="528" width="70" height="18" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_11_sortie_hospitalisation" bpmnElement="Flux_11_sortie_hospitalisation"><di:waypoint x="996" y="574" /><di:waypoint x="1140" y="573" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_12_sortie_hospitalisation" bpmnElement="Flux_12_sortie_hospitalisation"><di:waypoint x="1190" y="573" /><di:waypoint x="1255" y="573" /><di:waypoint x="1255" y="580" /><di:waypoint x="1320" y="580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Flux_13_sortie_hospitalisation" bpmnElement="Flux_13_sortie_hospitalisation"><di:waypoint x="1460" y="580" /><di:waypoint x="1480" y="580" /><di:waypoint x="1480" y="574" /><di:waypoint x="1500" y="574" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_lettre_sortie_sortie_hospitalisation" bpmnElement="Association_lettre_sortie_sortie_hospitalisation"><di:waypoint x="558" y="213" /><di:waypoint x="490" y="177" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Arete_Association_ordonnance_sortie_sortie_hospitalisation" bpmnElement="Association_ordonnance_sortie_sortie_hospitalisation"><di:waypoint x="568" y="436" /><di:waypoint x="495" y="404" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
